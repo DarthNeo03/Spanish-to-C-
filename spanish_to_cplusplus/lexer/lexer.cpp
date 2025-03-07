@@ -122,7 +122,7 @@ std::vector<Token> analizadorLexico(std::ifstream& archivo) {
             if (c != '"') {
                 std::cerr << "Error léxico: cadena sin terminar en línea " << linea << ", columna " << columna << std::endl;
             } else {
-                tokens.push_back({TOKEN_CADENA, buffer, linea, columna - buffer.length()});
+                tokens.push_back(Token{TOKEN_CADENA, buffer, linea, columna - static_cast<int>(buffer.length())});
                 columna++;
             }
             continue;
@@ -145,9 +145,9 @@ std::vector<Token> analizadorLexico(std::ifstream& archivo) {
             archivo.unget(); // Devolver el último carácter leído
 
             if (buffer.find('.') != std::string::npos) {
-                tokens.push_back({TOKEN_DECIMAL, buffer, linea, columna - buffer.length()});
+                tokens.push_back(Token{TOKEN_DECIMAL, buffer, linea, columna - static_cast<int>(buffer.length())});
             } else {
-                tokens.push_back({TOKEN_NUMERO, buffer, linea, columna - buffer.length()});
+                tokens.push_back(Token{TOKEN_NUMERO, buffer, linea, columna - static_cast<int>(buffer.length())});
             }
             continue;
         }
@@ -165,7 +165,7 @@ std::vector<Token> analizadorLexico(std::ifstream& archivo) {
             archivo.unget(); // Devolver el último carácter leído
 
             TokenType tipo = identificarPalabraReservada(buffer);
-            tokens.push_back({tipo, buffer, linea, columna - buffer.length()});
+            tokens.push_back(Token{tipo, buffer, linea, columna - static_cast<int>(buffer.length())});
             continue;
         }
 
@@ -182,7 +182,7 @@ std::vector<Token> analizadorLexico(std::ifstream& archivo) {
                 if (archivo.peek() == '=') { // Operador de igualdad (==)
                     archivo.get(); // Consume el segundo '='
                     tipo = TOKEN_IGUALDAD;
-                    tokens.push_back({tipo, "==", linea, columna});
+                    tokens.push_back(Token{tipo, "==", linea, columna});
                     columna += 2;
                     continue;
                 } else { // Operador de asignación (=)
@@ -193,7 +193,7 @@ std::vector<Token> analizadorLexico(std::ifstream& archivo) {
                 if (archivo.peek() == '=') { // Operador de desigualdad (!=)
                     archivo.get(); // Consume el '='
                     tipo = TOKEN_DESIGUALDAD;
-                    tokens.push_back({tipo, "!=", linea, columna});
+                    tokens.push_back(Token{tipo, "!=", linea, columna});
                     columna += 2;
                     continue;
                 } else {
@@ -207,15 +207,16 @@ std::vector<Token> analizadorLexico(std::ifstream& archivo) {
                 columna++;
                 continue;
         }
-        tokens.push_back({tipo, std::string(1, c), linea, columna});
+        tokens.push_back(Token{tipo, std::string(1, c), linea, columna});
         columna++;
     }
 
     // Añadir token de fin de archivo
-    tokens.push_back({TOKEN_EOF, "", linea, columna});
+    tokens.push_back(Token{TOKEN_EOF, "", linea, columna});
 
     return tokens;
 }
+
 int main() {
     std::string ruta;
     std::cout << "Ingrese la ruta del archivo: ";
