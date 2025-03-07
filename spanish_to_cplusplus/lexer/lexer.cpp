@@ -4,7 +4,7 @@
 #include <vector>
 #include <cctype> 
 
-//Enumeración de tipos de tokens
+// Enumeración de tipos de tokens
 enum TokenType {
     TOKEN_ENTERO,       
     TOKEN_ESCRIBIR,     
@@ -21,7 +21,7 @@ enum TokenType {
     TOKEN_PUNTO_COMA,
     TOKEN_COMA,
     TOKEN_ASIGNACION,
-    TOKEN_EOF, //END OF FILE
+    TOKEN_EOF, // END OF FILE
     TOKEN_CADENA,
     TOKEN_DECIMAL,
     TOKEN_IGUALDAD,
@@ -31,7 +31,7 @@ enum TokenType {
     
 };
 
-//Estructura para representar un token
+// Estructura para representar un token
 struct Token {
     TokenType type;
     std::string value;
@@ -39,7 +39,7 @@ struct Token {
     int column;
 };
 
-//Función para identificar palabras reservadas
+// Función para identificar palabras reservadas
 TokenType identificarPalabraReservada(const std::string& valor) {
     if (valor == "entero") return TOKEN_ENTERO;
     if (valor == "escribir") return TOKEN_ESCRIBIR;
@@ -47,10 +47,10 @@ TokenType identificarPalabraReservada(const std::string& valor) {
     if (valor == "repetir") return TOKEN_REPETIR;
     if (valor == "veces") return TOKEN_VECES;
     if (valor == "configurar_pin") return TOKEN_CONFIGURAR_PIN;
-    return TOKEN_IDENTIFICADOR; //Si no es una palabra reservada, es un identificador
+    return TOKEN_IDENTIFICADOR; // Si no es una palabra reservada, es un identificador
 }
 
-//Función para realizar el análisis léxico
+// Función para realizar el análisis léxico
 std::vector<Token> analizadorLexico(std::ifstream& archivo) {
     std::vector<Token> tokens;
     char c;
@@ -59,7 +59,7 @@ std::vector<Token> analizadorLexico(std::ifstream& archivo) {
     std::string buffer;
 
     while (archivo.get(c)) {
-        //Ignorar espacios en blanco
+        // Ignorar espacios en blanco
         if (std::isspace(c)) {
             if (c == '\n') {
                 linea++;
@@ -70,21 +70,21 @@ std::vector<Token> analizadorLexico(std::ifstream& archivo) {
             continue;
         }
 
-        //Detectar comentarios
+        // Detectar comentarios
         if (c == '/') {
             char nextChar = archivo.peek();
-            if (nextChar == '/') { //Comentario de una línea
-                archivo.get(); //Consume el segundo '/'
+            if (nextChar == '/') { // Comentario de una línea
+                archivo.get(); // Consume el segundo '/'
                 while (archivo.get(c) && c != '\n') {
-                    //Ignorar todos los caracteres hasta el final de la línea
+                    // Ignorar todos los caracteres hasta el final de la línea
                 }
                 if (c == '\n') {
                     linea++;
                     columna = 1;
                 }
                 continue;
-            } else if (nextChar == '*') { //Comentario de múltiples líneas
-                archivo.get(); //Consume el '*'
+            } else if (nextChar == '*') { // Comentario de múltiples líneas
+                archivo.get(); // Consume el '*'
                 bool comentarioTerminado = false;
                 while (archivo.get(c)) {
                     if (c == '\n') {
@@ -94,33 +94,33 @@ std::vector<Token> analizadorLexico(std::ifstream& archivo) {
                         columna++;
                     }
                     if (c == '*' && archivo.peek() == '/') {
-                        archivo.get(); //Consume el '/'
+                        archivo.get(); // Consume el '/'
                         comentarioTerminado = true;
                         break;
                     }
                 }
                 if (!comentarioTerminado) {
-                    std::cerr << "Error léxico: comentario sin terminar en linea " << linea << ", columna " << columna << std::endl;
+                    std::cerr << "Error lexico: comentario sin terminar en linea " << linea << ", columna " << columna << std::endl;
                 }
                 continue;
             }
         }
 
-        //Detectar cadenas de texto
+        // Detectar cadenas de texto
         if (c == '"') {
             buffer.clear();
             columna++;
 
             while (archivo.get(c) && c != '"') {
                 if (c == '\n') {
-                    std::cerr << "Error léxico: cadena sin terminar en linea " << linea << ", columna " << columna << std::endl;
+                    std::cerr << "Error lexico: cadena sin terminar en linea " << linea << ", columna " << columna << std::endl;
                     break;
                 }
                 buffer += c;
                 columna++;
             }
             if (c != '"') {
-                std::cerr << "Error léxico: cadena sin terminar en linea " << linea << ", columna " << columna << std::endl;
+                std::cerr << "Error lexico: cadena sin terminar en linea " << linea << ", columna " << columna << std::endl;
             } else {
                 tokens.push_back(Token{TOKEN_CADENA, buffer, linea, columna - static_cast<int>(buffer.length())});
                 columna++;
@@ -128,7 +128,7 @@ std::vector<Token> analizadorLexico(std::ifstream& archivo) {
             continue;
         }
 
-        //Detectar números enteros o decimales
+        // Detectar números enteros o decimales
         if (std::isdigit(c)) {
             buffer.clear();
             buffer += c;
@@ -136,13 +136,13 @@ std::vector<Token> analizadorLexico(std::ifstream& archivo) {
 
             while (archivo.get(c) && (std::isdigit(c) || c == '.')) {
                 if (c == '.' && buffer.find('.') != std::string::npos) {
-                    std::cerr << "Error léxico: número con múltiples puntos en linea " << linea << ", columna " << columna << std::endl;
+                    std::cerr << "Error lexico: numero con multiples puntos en linea " << linea << ", columna " << columna << std::endl;
                     break;
                 }
                 buffer += c;
                 columna++;
             }
-            archivo.unget(); //Devolver el último carácter leído
+            archivo.unget(); // Devolver el último carácter leído
 
             if (buffer.find('.') != std::string::npos) {
                 tokens.push_back(Token{TOKEN_DECIMAL, buffer, linea, columna - static_cast<int>(buffer.length())});
@@ -152,7 +152,7 @@ std::vector<Token> analizadorLexico(std::ifstream& archivo) {
             continue;
         }
 
-        //Detectar identificadores o palabras reservadas
+        // Detectar identificadores o palabras reservadas
         if (std::isalpha(c) || c == '_') {
             buffer.clear();
             buffer += c;
@@ -162,14 +162,14 @@ std::vector<Token> analizadorLexico(std::ifstream& archivo) {
                 buffer += c;
                 columna++;
             }
-            archivo.unget(); //Devolver el último carácter leído
+            archivo.unget(); // Devolver el último carácter leído
 
             TokenType tipo = identificarPalabraReservada(buffer);
             tokens.push_back(Token{tipo, buffer, linea, columna - static_cast<int>(buffer.length())});
             continue;
         }
 
-        //Detectar símbolos especiales y operadores compuestos
+        // Detectar símbolos especiales y operadores compuestos
         TokenType tipo;
         switch (c) {
             case '(': tipo = TOKEN_PARENTESIS_IZQ; break;
@@ -179,31 +179,31 @@ std::vector<Token> analizadorLexico(std::ifstream& archivo) {
             case ';': tipo = TOKEN_PUNTO_COMA; break;
             case ',': tipo = TOKEN_COMA; break;
             case '=':
-                if (archivo.peek() == '=') { //Operador de igualdad (==)
-                    archivo.get(); //Consume el segundo '='
+                if (archivo.peek() == '=') { // Operador de igualdad (==)
+                    archivo.get(); // Consume el segundo '='
                     tipo = TOKEN_IGUALDAD;
                     tokens.push_back(Token{tipo, "==", linea, columna});
                     columna += 2;
                     continue;
-                } else { //Operador de asignación (=)
+                } else { // Operador de asignación (=)
                     tipo = TOKEN_ASIGNACION;
                 }
                 break;
             case '!':
-                if (archivo.peek() == '=') { //Operador de desigualdad (!=)
-                    archivo.get(); //Consume el '='
+                if (archivo.peek() == '=') { // Operador de desigualdad (!=)
+                    archivo.get(); // Consume el '='
                     tipo = TOKEN_DESIGUALDAD;
                     tokens.push_back(Token{tipo, "!=", linea, columna});
                     columna += 2;
                     continue;
                 } else {
-                    std::cerr << "Error léxico: carácter inesperado '!' en linea " << linea << ", columna " << columna << std::endl;
+                    std::cerr << "Error lexico: caracter inesperado '!' en linea " << linea << ", columna " << columna << std::endl;
                     columna++;
                     continue;
                 }
                 break;
             default:
-                std::cerr << "Error léxico: carácter inesperado '" << c << "' en linea " << linea << ", columna " << columna << std::endl;
+                std::cerr << "Error lexico: caracter inesperado '" << c << "' en linea " << linea << ", columna " << columna << std::endl;
                 columna++;
                 continue;
         }
@@ -211,7 +211,7 @@ std::vector<Token> analizadorLexico(std::ifstream& archivo) {
         columna++;
     }
 
-    //Añadir token de fin de archivo
+    // Añadir token de fin de archivo
     tokens.push_back(Token{TOKEN_EOF, "", linea, columna});
 
     return tokens;
@@ -228,13 +228,13 @@ int main() {
         return 1;
     }
 
-    //Realizar el análisis léxico
+    // Realizar el análisis léxico
     std::vector<Token> tokens = analizadorLexico(archivo);
 
-    //Cerrar el archivo
+    // Cerrar el archivo
     archivo.close();
 
-    //Imprimir los tokens reconocidos
+    // Imprimir los tokens reconocidos
     for (const auto& token : tokens) {
         std::cout << "Token: " << token.value << " (Tipo: " << token.type << ", Linea: " << token.line << ", Columna: " << token.column << ")" << std::endl;
     }
