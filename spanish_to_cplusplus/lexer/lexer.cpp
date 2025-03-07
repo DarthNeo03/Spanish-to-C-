@@ -6,29 +6,64 @@
 
 // Enumeración de tipos de tokens
 enum TokenType {
-    TOKEN_ENTERO,       
-    TOKEN_ESCRIBIR,     
-    TOKEN_ESPERAR,
-    TOKEN_REPETIR,
+    // Palabras reservadas
+    TOKEN_INCLUIR,// Incluir librerias
+    TOKEN_PROGRAMA,// Gestión de bloques
+    TOKEN_FIN_PROGRAMA,
+    TOKEN_CONFIGURAR, 
+    TOKEN_FIN_CONFIGURAR,
+    TOKEN_BUCLE_PRINCIPAL, 
+    TOKEN_FIN_BUCLE,
+    TOKEN_SI,// Estructura de desición 
+    TOKEN_ENTONCES, 
+    TOKEN_SINO, 
+    TOKEN_FIN_SI,
+    TOKEN_PARA,// Bucle for  
+    TOKEN_DESDE, 
+    TOKEN_HASTA, 
+    TOKEN_HACER, 
+    TOKEN_FIN_PARA,
+    TOKEN_MIENTRAS,// Bucle while
+    TOKEN_FIN_MIENTRAS,
+    TOKEN_REPETIR, // Bucle do while
     TOKEN_VECES,
-    TOKEN_CONFIGURAR_PIN,
-    TOKEN_NUMERO,
+    TOKEN_FUNCION,// Funciones
+    TOKEN_FIN_FUNCION, 
+    TOKEN_RETORNAR,
+    // Tipos de datos
+    TOKEN_ENTERO,
+    TOKEN_FLOTANTE,
+    TOKEN_CADENA,
+    TOKEN_BOOLEANO, 
+    TOKEN_VERDADERO,// valor booleano 1
+    TOKEN_FALSO,// valor booleano 0
+    // Literales e identificadores
     TOKEN_IDENTIFICADOR,
+    TOKEN_NUMERO_LIT,// tipo entero
+    TOKEN_DECIMAL_LIT,// tipo flotante
+    TOKEN_CADENA_LIT,
+    TOKEN_CONFIGURAR_PIN,// Para controlar la tarjeta Arduino
+    TOKEN_ESCRIBIR,
+    TOKEN_ESPERAR,
+    // Símbolos y operadores
     TOKEN_PARENTESIS_IZQ,
     TOKEN_PARENTESIS_DER,
     TOKEN_LLAVE_IZQ,
     TOKEN_LLAVE_DER,
-    TOKEN_PUNTO_COMA,
     TOKEN_COMA,
     TOKEN_ASIGNACION,
-    TOKEN_EOF, // END OF FILE
-    TOKEN_CADENA,
-    TOKEN_DECIMAL,
     TOKEN_IGUALDAD,
     TOKEN_DESIGUALDAD,
-    TOKEN_SI,
-    TOKEN_NO,
-    
+    TOKEN_MAYOR_QUE,
+    TOKEN_MAYOR_IGUAL,
+    TOKEN_MENOR_QUE,
+    TOKEN_MENOR_IGUAL,
+    TOKEN_MAS,
+    TOKEN_MENOS,
+    TOKEN_DIV,
+    TOKEN_MULT,
+    TOKEN_PUNTO_COMA,
+    TOKEN_EOF, // END OF FILE (fin de archivo)
 };
 
 // Estructura para representar un token
@@ -41,12 +76,37 @@ struct Token {
 
 // Función para identificar palabras reservadas
 TokenType identificarPalabraReservada(const std::string& valor) {
-    if (valor == "entero") return TOKEN_ENTERO;
-    if (valor == "escribir") return TOKEN_ESCRIBIR;
-    if (valor == "esperar") return TOKEN_ESPERAR;
+    if (valor == "incluir") return TOKEN_INCLUIR;
+    if (valor == "programa") return TOKEN_PROGRAMA;
+    if (valor == "fin_programa") return TOKEN_FIN_PROGRAMA;
+    if (valor == "configurar") return TOKEN_CONFIGURAR;
+    if (valor == "fin_configurar") return TOKEN_FIN_CONFIGURAR;
+    if (valor == "bucle_principal") return TOKEN_BUCLE_PRINCIPAL;
+    if (valor == "fin_bucle") return TOKEN_FIN_BUCLE;
+    if (valor == "si") return TOKEN_SI;
+    if (valor == "entonces") return TOKEN_ENTONCES;
+    if (valor == "sino") return TOKEN_SINO;
+    if (valor == "fin_si") return TOKEN_FIN_SI;
+    if (valor == "para") return TOKEN_PARA;
+    if (valor == "desde") return TOKEN_DESDE;
+    if (valor == "hasta") return TOKEN_HASTA;
+    if (valor == "hacer") return TOKEN_HACER;
+    if (valor == "fin_para") return TOKEN_FIN_PARA;
+    if (valor == "mientras") return TOKEN_MIENTRAS;
+    if (valor == "fin_mientras") return TOKEN_FIN_MIENTRAS;
     if (valor == "repetir") return TOKEN_REPETIR;
     if (valor == "veces") return TOKEN_VECES;
+    if (valor == "funcion") return TOKEN_FUNCION;
+    if (valor == "fin_funcion") return TOKEN_FIN_FUNCION;
+    if (valor == "retornar") return TOKEN_RETORNAR;
+    if (valor == "entero") return TOKEN_ENTERO;
+    if (valor == "decimal") return TOKEN_FLOTANTE;
+    if (valor == "booleano") return TOKEN_BOOLEANO;
+    if (valor == "verdadero") return TOKEN_VERDADERO;
+    if (valor == "falso") return TOKEN_FALSO;
     if (valor == "configurar_pin") return TOKEN_CONFIGURAR_PIN;
+    if (valor == "escribir") return TOKEN_ESCRIBIR;
+    if (valor == "esperar") return TOKEN_ESPERAR;
     return TOKEN_IDENTIFICADOR; // Si no es una palabra reservada, es un identificador
 }
 
@@ -122,7 +182,7 @@ std::vector<Token> analizadorLexico(std::ifstream& archivo) {
             if (c != '"') {
                 std::cerr << "Error lexico: cadena sin terminar en linea " << linea << ", columna " << columna << std::endl;
             } else {
-                tokens.push_back(Token{TOKEN_CADENA, buffer, linea, columna - static_cast<int>(buffer.length())});
+                tokens.push_back(Token{TOKEN_CADENA_LIT, buffer, linea, columna - static_cast<int>(buffer.length())});
                 columna++;
             }
             continue;
@@ -145,9 +205,9 @@ std::vector<Token> analizadorLexico(std::ifstream& archivo) {
             archivo.unget(); // Devolver el último carácter leído
 
             if (buffer.find('.') != std::string::npos) {
-                tokens.push_back(Token{TOKEN_DECIMAL, buffer, linea, columna - static_cast<int>(buffer.length())});
+                tokens.push_back(Token{TOKEN_DECIMAL_LIT, buffer, linea, columna - static_cast<int>(buffer.length())});
             } else {
-                tokens.push_back(Token{TOKEN_NUMERO, buffer, linea, columna - static_cast<int>(buffer.length())});
+                tokens.push_back(Token{TOKEN_NUMERO_LIT, buffer, linea, columna - static_cast<int>(buffer.length())});
             }
             continue;
         }
@@ -202,6 +262,45 @@ std::vector<Token> analizadorLexico(std::ifstream& archivo) {
                     continue;
                 }
                 break;
+            case '>':
+                if (archivo.peek() == '=') { // Operador de mayor igual (>=)
+                    archivo.get();
+                    tokens.push_back(Token{TOKEN_MAYOR_IGUAL, ">=", linea, columna});
+                    columna += 2;
+                } else { // Operador de mayor que (>)
+                    tokens.push_back(Token{TOKEN_MAYOR_QUE, ">", linea, columna});
+                    columna++;
+                }
+                continue;
+            case '<':
+                if (archivo.peek() == '=') { // Operador de menor igual (<=)
+                    archivo.get();
+                    tokens.push_back(Token{TOKEN_MENOR_IGUAL, "<=", linea, columna});
+                    columna += 2;
+                } else { //  Operador de menor que (<)
+                    tokens.push_back(Token{TOKEN_MENOR_QUE, "<", linea, columna});
+                    columna++;
+                }
+                continue;
+            case '+': // Operador de suma
+                tokens.push_back(Token{TOKEN_MAS, "+", linea, columna});
+                columna++;
+                continue;
+            case '-': // Operador de resta
+                tokens.push_back(Token{TOKEN_MENOS, "-", linea, columna});
+                columna++;
+                continue;
+            case '*': // Operador de multiplicación
+                tokens.push_back(Token{TOKEN_MULT, "*", linea, columna});
+                columna++;
+                continue;
+            case '/':
+                // Validar si no es comentario
+                if (archivo.peek() != '/' && archivo.peek() != '*') {
+                    tokens.push_back(Token{TOKEN_DIV, "/", linea, columna});
+                    columna++;
+                    continue;
+                }
             default:
                 std::cerr << "Error lexico: caracter inesperado '" << c << "' en linea " << linea << ", columna " << columna << std::endl;
                 columna++;
