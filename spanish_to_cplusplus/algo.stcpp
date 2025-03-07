@@ -1,4 +1,4 @@
-entero x = 10;
-
+entero x = 10.5;
+cadena hola = "pedro";
 
 /*esto es un comentario*/

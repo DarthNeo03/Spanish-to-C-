@@ -1,0 +1,19 @@
+programa TestLexer
+    incluir <"Arduino">
+    entero x = 10.5;
+    cadena hola = "pedro";
+
+    /*esto es un comentario*/
+    
+    configurar
+        configurar_pin(13, "SALIDA")
+    fin_configurar
+
+    bucle_principal
+        escribir(13, "ALTO")
+        esperar(1000)
+        si (x < 10 - y) entonces
+            escribir("Resultado: ", 100 / 2)
+        fin_si
+    fin_bucle
+fin_programa

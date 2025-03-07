@@ -2,47 +2,47 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <cctype> 
+#include <cctype>
 
 // Enumeración de tipos de tokens
 enum TokenType {
     // Palabras reservadas
-    TOKEN_INCLUIR,// Incluir librerias
-    TOKEN_PROGRAMA,// Gestión de bloques
+    TOKEN_INCLUIR, // Incluir librerias
+    TOKEN_PROGRAMA, // Gestión de bloques
     TOKEN_FIN_PROGRAMA,
-    TOKEN_CONFIGURAR, 
+    TOKEN_CONFIGURAR,
     TOKEN_FIN_CONFIGURAR,
-    TOKEN_BUCLE_PRINCIPAL, 
+    TOKEN_BUCLE_PRINCIPAL,
     TOKEN_FIN_BUCLE,
-    TOKEN_SI,// Estructura de desición 
-    TOKEN_ENTONCES, 
-    TOKEN_SINO, 
+    TOKEN_SI, // Estructura de desición
+    TOKEN_ENTONCES,
+    TOKEN_SINO,
     TOKEN_FIN_SI,
-    TOKEN_PARA,// Bucle for  
-    TOKEN_DESDE, 
-    TOKEN_HASTA, 
-    TOKEN_HACER, 
+    TOKEN_PARA, // Bucle for
+    TOKEN_DESDE,
+    TOKEN_HASTA,
+    TOKEN_HACER,
     TOKEN_FIN_PARA,
-    TOKEN_MIENTRAS,// Bucle while
+    TOKEN_MIENTRAS, // Bucle while
     TOKEN_FIN_MIENTRAS,
     TOKEN_REPETIR, // Bucle do while
     TOKEN_VECES,
-    TOKEN_FUNCION,// Funciones
-    TOKEN_FIN_FUNCION, 
+    TOKEN_FUNCION, // Funciones
+    TOKEN_FIN_FUNCION,
     TOKEN_RETORNAR,
     // Tipos de datos
     TOKEN_ENTERO,
     TOKEN_FLOTANTE,
     TOKEN_CADENA,
-    TOKEN_BOOLEANO, 
-    TOKEN_VERDADERO,// valor booleano 1
-    TOKEN_FALSO,// valor booleano 0
+    TOKEN_BOOLEANO,
+    TOKEN_VERDADERO, // valor booleano 1
+    TOKEN_FALSO, // valor booleano 0
     // Literales e identificadores
     TOKEN_IDENTIFICADOR,
-    TOKEN_NUMERO_LIT,// tipo entero
-    TOKEN_DECIMAL_LIT,// tipo flotante
+    TOKEN_NUMERO_LIT, // tipo entero
+    TOKEN_DECIMAL_LIT, // tipo flotante
     TOKEN_CADENA_LIT,
-    TOKEN_CONFIGURAR_PIN,// Para controlar la tarjeta Arduino
+    TOKEN_CONFIGURAR_PIN, // Para controlar la tarjeta Arduino
     TOKEN_ESCRIBIR,
     TOKEN_ESPERAR,
     // Símbolos y operadores
@@ -101,7 +101,7 @@ TokenType identificarPalabraReservada(const std::string& valor) {
     if (valor == "retornar") return TOKEN_RETORNAR;
     if (valor == "entero") return TOKEN_ENTERO;
     if (valor == "decimal") return TOKEN_FLOTANTE;
-    if (valor == "cadena") return TOKEN_FLOTANTE;
+    if (valor == "cadena") return TOKEN_CADENA;
     if (valor == "booleano") return TOKEN_BOOLEANO;
     if (valor == "verdadero") return TOKEN_VERDADERO;
     if (valor == "falso") return TOKEN_FALSO;
@@ -110,7 +110,6 @@ TokenType identificarPalabraReservada(const std::string& valor) {
     if (valor == "esperar") return TOKEN_ESPERAR;
     return TOKEN_IDENTIFICADOR; // Si no es una palabra reservada, es un identificador
 }
-
 // Función para realizar el análisis léxico
 std::vector<Token> analizadorLexico(std::ifstream& archivo) {
     std::vector<Token> tokens;
