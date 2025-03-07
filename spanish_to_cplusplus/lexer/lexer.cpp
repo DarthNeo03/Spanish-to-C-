@@ -101,6 +101,7 @@ TokenType identificarPalabraReservada(const std::string& valor) {
     if (valor == "retornar") return TOKEN_RETORNAR;
     if (valor == "entero") return TOKEN_ENTERO;
     if (valor == "decimal") return TOKEN_FLOTANTE;
+    if (valor == "cadena") return TOKEN_FLOTANTE;
     if (valor == "booleano") return TOKEN_BOOLEANO;
     if (valor == "verdadero") return TOKEN_VERDADERO;
     if (valor == "falso") return TOKEN_FALSO;
