@@ -11,14 +11,19 @@ int main() {
         std::cerr << "Error: No se pudo abrir el archivo '" << ruta << "'." << std::endl;
         return 1;
     }
-
-    // Realizar el análisis léxico (para ver los tokens)
-    std::vector<Token> tokens = analizadorLexico(archivo);
     
     try {
         // Realizar el análisis léxico
         auto tokens = analizadorLexico(archivo);
         std::cout << "Analisis lexico completado!" << std::endl;
+        // Imprimir los tokens reconocidos
+        for (const auto& token : tokens) {
+            std::cout << "Token: " << token.value 
+                    << " (Tipo: " << tokenTypeToString(token.type)
+                    << ", Linea: " << token.line 
+                    << ", Columna: " << token.column << ")" << std::endl;
+        }
+
         // Realizar el análisis sintáctico
         Parser parser(tokens);
         parser.analizar();
@@ -30,20 +35,7 @@ int main() {
     }
 
     // Cerrar el archivo
-    archivo.close();
-
-    // Imprimir los tokens reconocidos
-    for (const auto& token : tokens) {
-        std::cout << "Token: " << token.value 
-                  << " (Tipo: " << tokenTypeToString(token.type)
-                  << ", Linea: " << token.line 
-                  << ", Columna: " << token.column << ")" << std::endl;
-    }
-    /*
-    for (const auto& token : tokens) {
-        std::cout << "Token: " << token.value << " (Tipo: " << token.type << ", Linea: " << token.line << ", Columna: " << token.column << ")" << std::endl;
-    }
-    */
+    archivo.close();    
 
     return 0;
 }
