@@ -79,6 +79,7 @@ struct Token {
 };
 
 // Declaraciones y definiciones de funciones
+// Función para identificar palabras reservadas
 inline TokenType identificarPalabraReservada(const std::string& valor) {
     if (valor == "incluir") return TOKEN_INCLUIR;
     if (valor == "programa") return TOKEN_PROGRAMA;
@@ -114,7 +115,7 @@ inline TokenType identificarPalabraReservada(const std::string& valor) {
     if (valor == "esperar") return TOKEN_ESPERAR;
     return TOKEN_IDENTIFICADOR; // Si no es una palabra reservada, es un identificador
 }
-
+// Función para realizar el análisis léxico
 inline std::vector<Token> analizadorLexico(std::ifstream& archivo) {
     std::vector<Token> tokens;
     char c;
