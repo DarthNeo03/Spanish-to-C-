@@ -1,5 +1,5 @@
 #include "lexer.h"
-// #include "parser.h"
+//#include "parser.h"
 
 int main() {
     std::string ruta;
@@ -13,15 +13,36 @@ int main() {
     }
 
     // Realizar el análisis léxico
-    std::vector<Token> tokens = analizadorLexico(archivo);
-
+    //std::vector<Token> tokens = analizadorLexico(archivo);
+    auto tokens = analizadorLexico(archivo);
+    std::cout << "Analisis lexico completado!" << std::endl;
+/*
+    try {
+        auto tokens = analizadorLexico(archivo);
+        Parser parser(tokens);
+        parser.analizar();
+        std::cout << "Análisis sintáctico completado exitosamente!" << std::endl;
+    }
+    catch (const ErrorSintactico& e) {
+        std::cerr << "Error sintáctico: " << e.what() << std::endl;
+        return 1;
+    }
+*/
     // Cerrar el archivo
     archivo.close();
 
     // Imprimir los tokens reconocidos
     for (const auto& token : tokens) {
+        std::cout << "Token: " << token.value 
+                  << " (Tipo: " << tokenTypeToString(token.type)
+                  << ", Linea: " << token.line 
+                  << ", Columna: " << token.column << ")" << std::endl;
+    }
+    /*
+    for (const auto& token : tokens) {
         std::cout << "Token: " << token.value << " (Tipo: " << token.type << ", Linea: " << token.line << ", Columna: " << token.column << ")" << std::endl;
     }
+    */
 
     return 0;
 }

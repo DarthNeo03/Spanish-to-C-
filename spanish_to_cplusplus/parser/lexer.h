@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <cctype>
+#include <map>
 
 // Enumeración de tipos de tokens
 enum TokenType {
@@ -70,6 +71,74 @@ enum TokenType {
     TOKEN_DESCONOCIDO // Para errores
 };
 
+// Mapa para convertir TokenType a string
+inline std::string tokenTypeToString(TokenType type) {
+    static const std::map<TokenType, std::string> typeNames = {
+        // Palabras reservadas
+        {TOKEN_INCLUIR, "TOKEN_INCLUIR"},
+        {TOKEN_PROGRAMA, "TOKEN_PROGRAMA"},
+        {TOKEN_FIN_PROGRAMA, "TOKEN_FIN_PROGRAMA"},
+        {TOKEN_CONFIGURAR, "TOKEN_CONFIGURAR"},
+        {TOKEN_FIN_CONFIGURAR, "TOKEN_FIN_CONFIGURAR"},
+        {TOKEN_BUCLE_PRINCIPAL, "TOKEN_BUCLE_PRINCIPAL"},
+        {TOKEN_FIN_BUCLE, "TOKEN_FIN_BUCLE"},
+        {TOKEN_SI, "TOKEN_SI"},
+        {TOKEN_ENTONCES, "TOKEN_ENTONCES"},
+        {TOKEN_SINO, "TOKEN_SINO"},
+        {TOKEN_FIN_SI, "TOKEN_FIN_SI"},
+        {TOKEN_PARA, "TOKEN_PARA"},
+        {TOKEN_DESDE, "TOKEN_DESDE"},
+        {TOKEN_HASTA, "TOKEN_HASTA"},
+        {TOKEN_HACER, "TOKEN_HACER"},
+        {TOKEN_FIN_PARA, "TOKEN_FIN_PARA"},
+        {TOKEN_MIENTRAS, "TOKEN_MIENTRAS"},
+        {TOKEN_FIN_MIENTRAS, "TOKEN_FIN_MIENTRAS"},
+        {TOKEN_REPETIR, "TOKEN_REPETIR"},
+        {TOKEN_VECES, "TOKEN_VECES"},
+        {TOKEN_FUNCION, "TOKEN_FUNCION"},
+        {TOKEN_FIN_FUNCION, "TOKEN_FIN_FUNCION"},
+        {TOKEN_RETORNAR, "TOKEN_RETORNAR"},
+        // Tipos de datos y literales
+        {TOKEN_ENTERO, "TOKEN_ENTERO"},
+        {TOKEN_FLOTANTE, "TOKEN_FLOTANTE"},
+        {TOKEN_CADENA, "TOKEN_CADENA"},
+        {TOKEN_BOOLEANO, "TOKEN_BOOLEANO"},
+        {TOKEN_VERDADERO, "TOKEN_VERDADERO"},
+        {TOKEN_FALSO, "TOKEN_FALSO"},
+        // Literales
+        {TOKEN_IDENTIFICADOR, "TOKEN_IDENTIFICADOR"},
+        {TOKEN_NUMERO_LIT, "TOKEN_NUMERO_LIT"},
+        {TOKEN_DECIMAL_LIT, "TOKEN_DECIMAL_LIT"},
+        {TOKEN_CADENA_LIT, "TOKEN_CADENA_LIT"},
+        {TOKEN_CONFIGURAR_PIN, "TOKEN_CONFIGURAR_PIN"},
+        {TOKEN_ESCRIBIR, "TOKEN_ESCRIBIR"},
+        {TOKEN_ESPERAR, "TOKEN_ESPERAR"},
+        // Operadores y símbolos
+        {TOKEN_PARENTESIS_IZQ, "TOKEN_PARENTESIS_IZQ"},
+        {TOKEN_PARENTESIS_DER, "TOKEN_PARENTESIS_DER"},
+        {TOKEN_LLAVE_IZQ, "TOKEN_LLAVE_IZQ"},
+        {TOKEN_LLAVE_DER, "TOKEN_LLAVE_DER"},
+        {TOKEN_COMA, "TOKEN_COMA"},
+        {TOKEN_ASIGNACION, "TOKEN_ASIGNACION"},
+        {TOKEN_IGUALDAD, "TOKEN_IGUALDAD"},
+        {TOKEN_DESIGUALDAD, "TOKEN_DESIGUALDAD"},
+        {TOKEN_MAYOR_QUE, "TOKEN_MAYOR_QUE"},
+        {TOKEN_MAYOR_IGUAL, "TOKEN_MAYOR_IGUAL"},
+        {TOKEN_MENOR_QUE, "TOKEN_MENOR_QUE"},
+        {TOKEN_MENOR_IGUAL, "TOKEN_MENOR_IGUAL"},
+        {TOKEN_MAS, "TOKEN_MAS"},
+        {TOKEN_MENOS, "TOKEN_MENOS"},
+        {TOKEN_DIV, "TOKEN_DIV"},
+        {TOKEN_MULT, "TOKEN_MULT"},
+        {TOKEN_PUNTO_COMA, "TOKEN_PUNTO_COMA"},
+        {TOKEN_EOF, "TOKEN_EOF"},
+        {TOKEN_DESCONOCIDO, "TOKEN_DESCONOCIDO"}
+    };
+
+    auto it = typeNames.find(type);
+    return it != typeNames.end() ? it->second : "TOKEN_DESCONOCIDO";
+}
+
 // Estructura para representar un token
 struct Token {
     TokenType type;
@@ -115,6 +184,7 @@ inline TokenType identificarPalabraReservada(const std::string& valor) {
     if (valor == "esperar") return TOKEN_ESPERAR;
     return TOKEN_IDENTIFICADOR; // Si no es una palabra reservada, es un identificador
 }
+
 // Función para realizar el análisis léxico
 inline std::vector<Token> analizadorLexico(std::ifstream& archivo) {
     std::vector<Token> tokens;
