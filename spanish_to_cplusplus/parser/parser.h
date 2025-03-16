@@ -12,6 +12,47 @@ public:
           linea(ln), columna(col) {}
 };
 
+enum TipoNodo {
+    BLOQUE,
+    SI,
+    MIENTRAS,
+    EXPRESION_BINARIA,
+    // ... otros tipos
+};
+
+class Nodo {
+public:
+    virtual ~Nodo() = default;
+    TipoNodo tipo;
+    int linea;
+    int columna;
+};
+
+class NodoExpresion : public Nodo {
+public:
+    TipoDato tipoDato;
+};
+
+class NodoLiteral : public NodoExpresion {
+public:
+    Token valor;
+    // Constructor...
+};
+
+class NodoVariable : public NodoExpresion {
+public:
+    std::string nombre;
+    // Constructor...
+};
+
+class NodoSi : public Nodo {
+public:
+    NodoExpresion* condicion;
+    /*NodoBloque* bloqueSi;
+    NodoBloque* bloqueSino;*/
+    // Constructor...
+};
+
 class Parser {
 private:
     std::vector<Token> tokens;
@@ -131,10 +172,10 @@ private:
                 sentenciaEscritura();
                 break;
             case TOKEN_ESPERAR:
-                sentenciaEspera();
+                //sentenciaEspera();
                 break;
             case TOKEN_SI:
-                sentenciaSi();
+                //sentenciaSi();
                 break;
             default:
                 throw ErrorSintactico("Declaración no válida", actual().line, actual().column);
@@ -162,7 +203,7 @@ private:
         
         if (actual().type == TOKEN_ASIGNACION) {
             avanzar();
-            expresion();
+            //expresion();
         }
         
         coincidir(TOKEN_PUNTO_COMA);
@@ -173,7 +214,7 @@ private:
         coincidir(TOKEN_PARENTESIS_IZQ);
         
         while (actual().type != TOKEN_PARENTESIS_DER) {
-            expresion();
+            //expresion();
             if (actual().type == TOKEN_COMA) {
                 avanzar();
             }
@@ -183,5 +224,5 @@ private:
         coincidir(TOKEN_PUNTO_COMA);
     }
 
-    
+    // ... (Implementar resto de funciones para expresiones, sentencias SI, etc)
 };
