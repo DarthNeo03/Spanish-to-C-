@@ -1,3 +1,6 @@
+#ifndef SIMBOLOS_H
+#define SIMBOLOS_H
+
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -13,8 +16,8 @@ enum TipoDato {
 struct Simbolo {
     std::string nombre;
     TipoDato tipo;
-    std::variant<int, float, std::string, bool> valor;
     int lineaDeclaracion;
+    std::variant<int, float, std::string, bool> valor;
 };
 
 class TablaSimbolos {
@@ -31,7 +34,7 @@ public:
         return (it != simbolos.end()) ? &it->second : nullptr;
     }
 
-    void limpiar() {
-        simbolos.clear();
-    }
+    void limpiar() { simbolos.clear(); }
 };
+
+#endif // SIMBOLOS_H

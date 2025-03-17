@@ -15,7 +15,6 @@ int main() {
     try {
         // Realizar el análisis léxico
         auto tokens = analizadorLexico(archivo);
-        std::cout << "Analisis lexico completado!" << std::endl;
         // Imprimir los tokens reconocidos
         for (const auto& token : tokens) {
             std::cout << "Token: " << token.value 
@@ -23,14 +22,15 @@ int main() {
                     << ", Linea: " << token.line 
                     << ", Columna: " << token.column << ")" << std::endl;
         }
+        std::cout << "Analisis lexico completado!" << std::endl;
 
         // Realizar el análisis sintáctico
         Parser parser(tokens);
         parser.analizar();
-        std::cout << "Análisis sintáctico completado exitosamente!" << std::endl;
+        std::cout << "Analisis sintactico completado exitosamente!" << std::endl;
     }
     catch (const ErrorSintactico& e) {
-        std::cerr << "Error sintáctico: " << e.what() << std::endl;
+        std::cerr << "Error sintactico!: " << e.what() << std::endl;
         return 1;
     }
 
