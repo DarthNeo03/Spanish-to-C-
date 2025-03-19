@@ -33,6 +33,10 @@ int main() {
         std::cerr << "Error sintactico!: " << e.what() << std::endl;
         return 1;
     }
+    catch (const ErrorSemantico& e) {
+        std::cerr << "Error semantico!: " << e.what() << std::endl;
+        return 1;
+    }
 
     // Cerrar el archivo
     archivo.close();    
