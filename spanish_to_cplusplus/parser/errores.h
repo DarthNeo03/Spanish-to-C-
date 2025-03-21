@@ -19,10 +19,10 @@ inline void imprimirErrores(const std::vector<Error>& errores) {
 
     std::cout << "\nErrores encontrados (" << errores.size() << "):\n";
     std::cout << std::left 
-        << std::setw(8) << "Línea"
+        << std::setw(8) << "Linea"
         << std::setw(8) << "Columna"
         << std::setw(12) << "Tipo"
-        << "Descripción\n";
+        << "Descripcion\n";
     
     for (const auto& error : errores) {
         std::cout << std::setw(8) << error.linea

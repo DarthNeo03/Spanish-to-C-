@@ -19,7 +19,18 @@ enum TipoNodo {
     NODO_ASIGNACION,
     NODO_EXPRESION,
     NODO_LITERAL,
-    NODO_VARIABLE
+    NODO_VARIABLE,
+    NODO_INCLUIR,
+    NODO_CONFIGURAR,
+    NODO_BUCLE_PRINCIPAL,
+    NODO_LLAMADA_FUNCION
+};
+
+// Tipo básico para expresiones
+enum class TipoExpresion {
+    VARIABLE,
+    LITERAL,
+    OPERACION
 };
 
 struct Nodo {
@@ -30,15 +41,30 @@ struct Nodo {
 };
 
 struct NodoExpresion : public Nodo {
-    TipoDato tipoDato = INDEFINIDO;
+    TipoExpresion tipo;
 };
 
 struct NodoLiteral : public NodoExpresion {
     std::string valor;
+    std::string tipoDato;  // Nuevo miembro requerido
+    
+    NodoLiteral() {
+        tipo = TipoExpresion::LITERAL;
+    }
 };
 
 struct NodoVariable : public NodoExpresion {
     std::string nombre;
+    std::string tipoDato;  // Nuevo miembro requerido
+    
+    NodoVariable() {
+        tipo = TipoExpresion::VARIABLE;
+    }
+};
+
+struct NodoLlamadaFuncion : public Nodo {
+    std::string nombre;
+    std::vector<std::unique_ptr<NodoExpresion>> argumentos;
 };
 
 struct NodoDeclaracion : public Nodo {
@@ -50,6 +76,19 @@ struct NodoDeclaracion : public Nodo {
 struct NodoPrograma : public Nodo {
     std::vector<std::unique_ptr<Nodo>> declaraciones;
 };
+
+struct NodoIncluir : public Nodo {
+    std::string archivo;
+};
+
+struct NodoConfigurar : public Nodo {
+    std::vector<std::unique_ptr<Nodo>> instrucciones;
+};
+
+struct NodoBuclePrincipal : public Nodo {
+    std::vector<std::unique_ptr<Nodo>> instrucciones;
+};
+
 
 //--------------------------------------------------
 // Clase principal del Parser
@@ -77,12 +116,23 @@ private:
         if (posInicial == posActual) posActual++; // Prevenir loop
     }
 
+    bool finalBloque() {
+        return actual().type == TOKEN_FIN_CONFIGURAR || 
+               actual().type == TOKEN_FIN_BUCLE ||
+               actual().type == TOKEN_FIN_PROGRAMA;
+    }
+
+    bool funcionesBuclePrincipal() {
+        return actual().type == TOKEN_ESCRIBIR || 
+               actual().type == TOKEN_ESPERAR;
+    }
+
     // Helpers de análisis
     Token& actual() {
         if (posActual >= tokens.size()) {
             static Token tokenError = {TOKEN_DESCONOCIDO, "", 0, 0};
             if (posActual == tokens.size()) { // Solo registrar error una vez
-                errores.push_back({"Fin de archivo inesperado", tokens.back().line, tokens.back().column, "Sintáctico"});
+                errores.push_back({"Fin de archivo inesperado", tokens.back().line, tokens.back().column, "Sintactico"});
             }
             posActual++; // Evitar múltiples llamadas
             return tokenError;
@@ -97,7 +147,7 @@ private:
             errores.push_back({
                 "Token inesperado. Esperado: " + tokenTypeToString(esperado) + 
                 ", Encontrado: " + tokenTypeToString(actual().type),
-                actual().line, actual().column, "Sintáctico"
+                actual().line, actual().column, "Sintactico"
             });
             recuperarError();
             return;
@@ -142,14 +192,28 @@ private:
         coincidir(TOKEN_IDENTIFICADOR);
         
         while (actual().type != TOKEN_FIN_PROGRAMA) {
-            if (esTipoDato(actual().type)) {
-                ast->declaraciones.push_back(declaracionVariable());
-            } else {
-                errores.push_back({
-                    "Declaración inválida",
-                    actual().line, actual().column, "Sintáctico"
-                });
-                recuperarError();
+            switch (actual().type) {
+                case TOKEN_INCLUIR:
+                    ast->declaraciones.push_back(funcionIncluir());
+                    break;
+                case TOKEN_ENTERO:
+                case TOKEN_FLOTANTE:
+                case TOKEN_CADENA:
+                case TOKEN_BOOLEANO:
+                    ast->declaraciones.push_back(declaracionVariable());
+                    break;
+                case TOKEN_CONFIGURAR:
+                    ast->declaraciones.push_back(funcionConfigurar());
+                    break;
+                case TOKEN_BUCLE_PRINCIPAL:
+                    ast->declaraciones.push_back(funcionBuclePrincipal());
+                    break;
+                default:
+                    errores.push_back({
+                        "Declaracion o instruccion invalida",
+                        actual().line, actual().column, "Sintactico"
+                    });
+                    recuperarError();
             }
         }
         
@@ -169,8 +233,8 @@ private:
         // Identificador
         if (actual().type != TOKEN_IDENTIFICADOR) {
             errores.push_back({
-                "Se esperaba identificador después de tipo de dato",
-                actual().line, actual().column, "Sintáctico"
+                "Se esperaba identificador despues de tipo de dato",
+                actual().line, actual().column, "Sintactico"
             });
             recuperarError();
             return nullptr;
@@ -213,14 +277,157 @@ private:
             avanzar();
         } else {
             errores.push_back({
-                "Expresión inválida",
-                actual().line, actual().column, "Sintáctico"
+                "Expresion invalida",
+                actual().line, actual().column, "Sintactico"
             });
             recuperarError();
             return nullptr;
         }
 
         return expr;
+    }
+
+    std::unique_ptr<Nodo> funcionIncluir() {
+        auto nodo = std::make_unique<NodoIncluir>();
+        nodo->tipo = NODO_INCLUIR;
+        nodo->linea = actual().line;
+        nodo->columna = actual().column;
+        
+        avanzar(); // Consumir TOKEN_INCLUIR
+        coincidir(TOKEN_MENOR_QUE);
+        
+        if (actual().type != TOKEN_CADENA_LIT) {
+            errores.push_back({
+                "Se esperaba nombre de archivo entre comillas",
+                actual().line, actual().column, "Sintactico"
+            });
+            recuperarError();
+            return nullptr;
+        }
+        
+        nodo->archivo = actual().value;
+        avanzar(); // Consumir cadena
+        coincidir(TOKEN_MAYOR_QUE);
+        
+        return nodo;
+    }
+    
+    std::unique_ptr<Nodo> funcionConfigurar() {
+        auto nodo = std::make_unique<NodoConfigurar>();
+        nodo->tipo = NODO_CONFIGURAR;
+        nodo->linea = actual().line;
+        nodo->columna = actual().column;
+        
+        avanzar(); // Consumir TOKEN_CONFIGURAR
+        
+        while (actual().type != TOKEN_FIN_CONFIGURAR && !finalBloque()) {
+            if (actual().type == TOKEN_CONFIGURAR_PIN) {
+                auto llamada = llamadaFuncion();
+                if (llamada) {
+                    nodo->instrucciones.push_back(std::move(llamada));
+                }
+            } else {
+                errores.push_back({
+                    "Instruccion invalida en bloque configurar",
+                    actual().line, actual().column, "Sintactico"
+                });
+                recuperarError();
+            }
+        }
+        
+        coincidir(TOKEN_FIN_CONFIGURAR);
+        return nodo;
+    }
+    
+    std::unique_ptr<Nodo> funcionBuclePrincipal() {
+        auto nodo = std::make_unique<NodoBuclePrincipal>();
+        nodo->tipo = NODO_BUCLE_PRINCIPAL;
+        nodo->linea = actual().line;
+        nodo->columna = actual().column;
+        
+        avanzar(); // Consumir TOKEN_BUCLE_PRINCIPAL
+        
+        while (actual().type != TOKEN_FIN_CONFIGURAR && !finalBloque()) {
+            std::cout << "Token S: " << actual().value 
+            << " (Tipo: " << actual().type
+            << ", Linea: " << actual().line 
+            << ", Columna: " << actual().column << ")" << std::endl;
+            if (funcionesBuclePrincipal()) {
+                auto llamada = llamadaFuncion();
+                if (llamada) {
+                    nodo->instrucciones.push_back(std::move(llamada));
+                }
+            } else {
+                errores.push_back({
+                    "Instruccion invalida en bucle principal",
+                    actual().line, actual().column, "Sintactico"
+                });
+                recuperarError();
+            }
+        }
+        
+        coincidir(TOKEN_FIN_BUCLE);
+        return nodo;
+    }
+
+    //--------------------------------------------------
+    // Función mejorada llamadaFuncion() para soportar parámetros
+    //--------------------------------------------------
+    std::unique_ptr<NodoLlamadaFuncion> llamadaFuncion() {
+        auto nodo = std::make_unique<NodoLlamadaFuncion>();
+        nodo->tipo = NODO_LLAMADA_FUNCION;
+        nodo->linea = actual().line;
+        nodo->columna = actual().column;
+        nodo->nombre = actual().value;
+        avanzar(); // Consumir el identificador
+        
+        // Manejo de paréntesis de apertura
+        if (actual().type != TOKEN_PARENTESIS_IZQ) {
+            errores.push_back({
+                "Se esperaba '(' despues de nombre de funcion",
+                actual().line, actual().column, "Sintactico"
+            });
+            recuperarError();
+            return nullptr;
+        }
+        avanzar();// Consumir paréntesis izquierdo
+        
+        // Procesamiento de argumentos
+        while (actual().type != TOKEN_PARENTESIS_DER && !finalBloque()) {
+            auto expr = expresion();
+            if (expr) {
+                nodo->argumentos.push_back(std::move(expr));
+            }
+            
+            if (actual().type == TOKEN_COMA) {
+                avanzar();
+            } else if (actual().type != TOKEN_PARENTESIS_DER) {
+                errores.push_back({
+                    "Se esperaba ',' o ')' en lista de argumentos",
+                    actual().line, actual().column, "Sintactico"
+                });
+                recuperarError();
+            }
+        }
+        
+        // Manejo de paréntesis de cierre
+        if (actual().type != TOKEN_PARENTESIS_DER) {
+            errores.push_back({
+                "Llave no cerrada en llamada a funcion",
+                actual().line, actual().column, "Sintactico"
+            });
+        } else {
+            avanzar();
+        }
+
+        if (actual().type != TOKEN_PUNTO_COMA) {
+            errores.push_back({"Se esperaba ';' despues de llamada a funcion", 
+                              actual().line, actual().column, "Sintactico"});
+        } else {
+            avanzar();  // Consumir el ';'
+        }
+        
+        return nodo;
     }
 
     //--------------------------------------------------
@@ -230,7 +437,7 @@ private:
         if (tablaSimbolos.buscar(nombre)) {
             errores.push_back({
                 "Variable ya declarada: " + nombre,
-                actual().line, actual().column, "Semántico"
+                actual().line, actual().column, "Semantico"
             });
         }
     }
@@ -239,7 +446,7 @@ private:
         if (!tablaSimbolos.buscar(nombre)) {
             errores.push_back({
                 "Variable no declarada: " + nombre,
-                actual().line, actual().column, "Semántico"
+                actual().line, actual().column, "Semantico"
             });
         }
     }
