@@ -23,7 +23,7 @@ enum TipoNodo {
     NODO_INCLUIR,
     NODO_CONFIGURAR,
     NODO_BUCLE_PRINCIPAL,
-    NODO_LLAMADA_FUNCION
+    NODO_LLAMADA_FUNCION,
 };
 
 // Tipo básico para expresiones
@@ -156,6 +156,11 @@ private:
     }
 
 public:
+
+    TablaSimbolos& obtenerTablaSimbolos() { 
+            return tablaSimbolos; 
+        }        
+
     Parser(std::vector<Token> tokens, std::vector<Error>& errores) 
         : tokens(std::move(tokens)), errores(errores), ast(new NodoPrograma) {
         // Insertar token de fin automáticamente

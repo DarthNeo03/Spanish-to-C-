@@ -1,5 +1,6 @@
 #include "lexer.h"
 #include "parser.h"
+#include "semantic.h"
 
 int main() {
     std::vector<Error> erroresGlobales;
@@ -28,6 +29,16 @@ int main() {
         // Realizar el análisis sintáctico
         Parser parser(tokens, erroresGlobales);
         auto ast = parser.analizar();
+
+        
+
+        if (erroresGlobales.empty()) {
+        AnalizadorSemantico semantico(erroresGlobales, parser.obtenerTablaSimbolos());
+        semantico.analizar(ast.get());
+        
+        std::cout << "\nCodigo generado:\n";
+        std::cout << semantico.obtenerCodigo() << "\n";
+    }
 
         
     } catch (const std::bad_alloc&) {
