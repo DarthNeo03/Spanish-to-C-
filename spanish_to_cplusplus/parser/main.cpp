@@ -2,6 +2,7 @@
 #include "parser.h"
 
 int main() {
+    std::vector<Error> erroresGlobales;
     std::string ruta;
     std::cout << "Ingrese la ruta del archivo: ";
     std::getline(std::cin, ruta);
@@ -25,17 +26,21 @@ int main() {
         std::cout << "Analisis lexico completado!" << std::endl;
 
         // Realizar el análisis sintáctico
-        Parser parser(tokens);
-        parser.analizar();
-        std::cout << "Analisis sintactico completado exitosamente!" << std::endl;
+        Parser parser(tokens, erroresGlobales);
+        auto ast = parser.analizar();
+
+        
+    } catch (const std::bad_alloc&) {
+        std::cerr << "\nERROR CRÍTICO: Memoria insuficiente. Verifique errores de bucle infinito\n";
+        return EXIT_FAILURE;
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
     }
-    catch (const ErrorSintactico& e) {
-        std::cerr << "Error sintactico!: " << e.what() << std::endl;
-        return 1;
-    }
-    catch (const ErrorSemantico& e) {
-        std::cerr << "Error semantico!: " << e.what() << std::endl;
-        return 1;
+
+    imprimirErrores(erroresGlobales);
+    if (erroresGlobales.empty()) {
+        std::cout << "Analisis sintactico completado!" << std::endl;
+        //parser.imprimirTablaSimbolos();
     }
 
     // Cerrar el archivo

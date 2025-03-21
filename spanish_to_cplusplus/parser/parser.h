@@ -3,9 +3,12 @@
 
 #include "lexer.h"
 #include "simbolos.h"
+#include "errores.h"
 #include <vector>
 #include <memory>
 #include <stdexcept>
+#include <iostream>
+#include <iomanip>
 
 //--------------------------------------------------
 // Estructuras del AST (Árbol de Sintaxis Abstracta)
@@ -49,29 +52,6 @@ struct NodoPrograma : public Nodo {
 };
 
 //--------------------------------------------------
-// Manejo de errores
-//--------------------------------------------------
-class ErrorSintactico : public std::runtime_error {
-public:
-    int linea;
-    int columna;
-
-    ErrorSintactico(const std::string& msg, int ln, int col)
-        : std::runtime_error(msg + " (Linea: " + std::to_string(ln) + ", Columna: " + std::to_string(col) + ")"), 
-          linea(ln), columna(col) {}
-};
-
-class ErrorSemantico : public std::runtime_error {
-public:
-    int linea;
-    int columna;
-
-    ErrorSemantico(const std::string& msg, int ln, int col)
-        : std::runtime_error(msg + " (Linea: " + std::to_string(ln) + ")"), 
-          linea(ln), columna(col) {}
-};
-
-//--------------------------------------------------
 // Clase principal del Parser
 //--------------------------------------------------
 class Parser {
@@ -81,10 +61,32 @@ private:
     TablaSimbolos tablaSimbolos;
     std::unique_ptr<NodoPrograma> ast;
 
+    //Para insertar los errores en la tabla
+    std::vector<Error>& errores;
+
+    // Nueva estrategia de recuperación
+    void recuperarError() {
+        size_t posInicial = posActual;
+        // Avanza hasta encontrar un punto de sincronización
+        while (posActual < tokens.size() && 
+            actual().type != TOKEN_PUNTO_COMA && 
+            actual().type != TOKEN_LLAVE_DER && 
+            actual().type != TOKEN_FIN_PROGRAMA) {
+            posActual++;
+        }
+        if (posInicial == posActual) posActual++; // Prevenir loop
+    }
+
     // Helpers de análisis
     Token& actual() {
-        if (posActual >= tokens.size())
-            throw ErrorSintactico("Fin de archivo inesperado", tokens.back().line, tokens.back().column);
+        if (posActual >= tokens.size()) {
+            static Token tokenError = {TOKEN_DESCONOCIDO, "", 0, 0};
+            if (posActual == tokens.size()) { // Solo registrar error una vez
+                errores.push_back({"Fin de archivo inesperado", tokens.back().line, tokens.back().column, "Sintáctico"});
+            }
+            posActual++; // Evitar múltiples llamadas
+            return tokenError;
+        }
         return tokens[posActual];
     }
 
@@ -92,23 +94,46 @@ private:
 
     void coincidir(TokenType esperado) {
         if (actual().type != esperado) {
-            throw ErrorSintactico(
+            errores.push_back({
                 "Token inesperado. Esperado: " + tokenTypeToString(esperado) + 
                 ", Encontrado: " + tokenTypeToString(actual().type),
-                actual().line, actual().column
-            );
+                actual().line, actual().column, "Sintáctico"
+            });
+            recuperarError();
+            return;
         }
         avanzar();
     }
 
 public:
-    Parser(std::vector<Token> tokens) : tokens(std::move(tokens)), ast(new NodoPrograma) {
-        ast->tipo = NODO_PROGRAMA;
+    Parser(std::vector<Token> tokens, std::vector<Error>& errores) 
+        : tokens(std::move(tokens)), errores(errores), ast(new NodoPrograma) {
+        // Insertar token de fin automáticamente
+        if (!this->tokens.empty() && this->tokens.back().type != TOKEN_FIN_PROGRAMA) {
+            this->tokens.push_back({TOKEN_FIN_PROGRAMA, "", 0, 0});
+        }
     }
 
     std::unique_ptr<NodoPrograma> analizar() {
         programa();
         return std::move(ast);
+    }
+
+    // Método para imprimir tabla de símbolos
+    inline void imprimirTablaSimbolos() const {
+        std::cout << "\nTabla de Simbolos:\n";
+        std::cout << std::left 
+            << std::setw(20) << "Nombre"
+            << std::setw(15) << "Tipo"
+            << std::setw(10) << "Linea"
+            << "Valor\n";
+            
+        for (const auto& [nombre, simbolo] : tablaSimbolos.simbolos) {
+            std::cout << std::setw(20) << nombre
+                    << std::setw(15) << tipoDatoToString(simbolo.tipo)
+                    << std::setw(10) << simbolo.lineaDeclaracion
+                    << valorToString(simbolo.valor) << "\n";
+        }
     }
 
 private:
@@ -120,7 +145,11 @@ private:
             if (esTipoDato(actual().type)) {
                 ast->declaraciones.push_back(declaracionVariable());
             } else {
-                throw ErrorSintactico("Declaración inválida", actual().line, actual().column);
+                errores.push_back({
+                    "Declaración inválida",
+                    actual().line, actual().column, "Sintáctico"
+                });
+                recuperarError();
             }
         }
         
@@ -139,7 +168,12 @@ private:
 
         // Identificador
         if (actual().type != TOKEN_IDENTIFICADOR) {
-            throw ErrorSintactico("Se esperaba identificador", actual().line, actual().column);
+            errores.push_back({
+                "Se esperaba identificador después de tipo de dato",
+                actual().line, actual().column, "Sintáctico"
+            });
+            recuperarError();
+            return nullptr;
         }
         nodo->identificador = actual().value;
         verificarDeclaracionDuplicada(nodo->identificador);
@@ -178,7 +212,12 @@ private:
             expr = std::move(lit);
             avanzar();
         } else {
-            throw ErrorSintactico("Expresión inválida", actual().line, actual().column);
+            errores.push_back({
+                "Expresión inválida",
+                actual().line, actual().column, "Sintáctico"
+            });
+            recuperarError();
+            return nullptr;
         }
 
         return expr;
@@ -189,13 +228,19 @@ private:
     //--------------------------------------------------
     void verificarDeclaracionDuplicada(const std::string& nombre) {
         if (tablaSimbolos.buscar(nombre)) {
-            throw ErrorSemantico("Variable ya declarada: " + nombre, actual().line, actual().column);
+            errores.push_back({
+                "Variable ya declarada: " + nombre,
+                actual().line, actual().column, "Semántico"
+            });
         }
     }
 
     void verificarVariableDeclarada(const std::string& nombre) {
         if (!tablaSimbolos.buscar(nombre)) {
-            throw ErrorSemantico("Variable no declarada: " + nombre, actual().line, actual().column);
+            errores.push_back({
+                "Variable no declarada: " + nombre,
+                actual().line, actual().column, "Semántico"
+            });
         }
     }
 
@@ -208,8 +253,8 @@ private:
         Simbolo simbolo{
             declaracion.identificador,
             declaracion.tipoDeclarado,
-            {}, // Valor inicial
-            declaracion.linea
+            declaracion.linea,
+            {} // Valor inicial
         };
         tablaSimbolos.insertar(simbolo);
     }
