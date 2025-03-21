@@ -14,7 +14,7 @@ struct Error {
 };
 
 // Función para imprimir errores en formato de tabla
-inline void imprimirErrores(const std::vector<Error>& errores) {
+/*inline void imprimirErrores(const std::vector<Error>& errores) {
     if (errores.empty()) return;
 
     std::cout << "\nErrores encontrados (" << errores.size() << "):\n";
@@ -30,6 +30,25 @@ inline void imprimirErrores(const std::vector<Error>& errores) {
                 << std::setw(12) << error.tipo
                 << error.mensaje << "\n";
     }
+}*/
+inline void imprimirErrores(const std::vector<Error>& errores) {
+    if (errores.empty()) return;
+
+    // Bordes básicos con caracteres ASCII
+    std::cout << "\n+---------------------+\n";
+    std::cout << "| Errores encontrados (" << errores.size() << ")\n";
+    std::cout << "+--------+--------+--------------+------------------------------+\n";
+    std::cout << "| Linea  | Columna| Tipo         | Descripcion                  |\n";
+    std::cout << "+--------+--------+--------------+------------------------------+\n";
+
+    for (const auto& error : errores) {
+        std::cout << "| " << std::setw(6) << error.linea
+                  << " | " << std::setw(6) << error.columna
+                  << " | " << std::setw(12) << error.tipo
+                  << " | " << std::setw(20) << error.mensaje << " |\n";
+    }
+    
+    std::cout << "+--------+--------+--------------+------------------------------+\n";
 }
 
 #endif // ERRORES_H

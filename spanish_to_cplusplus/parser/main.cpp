@@ -1,13 +1,23 @@
 #include "lexer.h"
 #include "parser.h"
 #include "semantic.h"
+#include <iostream>
+#include <fstream>
+#include <vector>
 
-int main() {
+int main(int argc, char* argv[]) {
     std::vector<Error> erroresGlobales;
     std::string ruta;
-    std::cout << "Ingrese la ruta del archivo: ";
-    std::getline(std::cin, ruta);
 
+    // Verificar si se proporcionó un argumento (ruta del archivo)
+    if (argc > 1) {
+        ruta = argv[1]; // Usar el primer argumento como ruta
+    } else {
+        // Solicitar la ruta al usuario si no se proporcionó como argumento
+        std::cout << "Ingrese la ruta del archivo: ";
+        std::getline(std::cin, ruta);
+    }
+    // Intentar abrir el archivo
     std::ifstream archivo(ruta);
     if (!archivo.is_open()) {
         std::cerr << "Error: No se pudo abrir el archivo '" << ruta << "'." << std::endl;
@@ -30,28 +40,26 @@ int main() {
         Parser parser(tokens, erroresGlobales);
         auto ast = parser.analizar();
 
-        
-
         if (erroresGlobales.empty()) {
-        AnalizadorSemantico semantico(erroresGlobales, parser.obtenerTablaSimbolos());
-        semantico.analizar(ast.get());
-        
-        std::cout << "\nCodigo generado:\n";
-        std::cout << semantico.obtenerCodigo() << "\n";
-    }
+            std::cout << "Analisis sintactico completado!" << std::endl;
+            parser.imprimirTablaSimbolos();
 
-        
+            AnalizadorSemantico semantico(erroresGlobales, parser.obtenerTablaSimbolos());
+            semantico.analizar(ast.get());
+            
+            std::cout << "\nCodigo generado:\n";
+            std::cout << semantico.obtenerCodigo() << "\n";
+        } else {
+            imprimirErrores(erroresGlobales);
+            std::cerr << "Analisis sintactico completado con errores!" << std::endl;
+        }   
+
+         
     } catch (const std::bad_alloc&) {
         std::cerr << "\nERROR CRÍTICO: Memoria insuficiente. Verifique errores de bucle infinito\n";
         return EXIT_FAILURE;
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
-    }
-
-    imprimirErrores(erroresGlobales);
-    if (erroresGlobales.empty()) {
-        std::cout << "Analisis sintactico completado!" << std::endl;
-        //parser.imprimirTablaSimbolos();
     }
 
     // Cerrar el archivo

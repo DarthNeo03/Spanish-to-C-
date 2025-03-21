@@ -175,19 +175,32 @@ public:
     }
 
     // Método para imprimir tabla de símbolos
-    inline void imprimirTablaSimbolos() const {
+    /*inline void imprimirTablaSimbolos() const {
         std::cout << "\nTabla de Simbolos:\n";
-        std::cout << std::left 
-            << std::setw(20) << "Nombre"
-            << std::setw(15) << "Tipo"
-            << std::setw(10) << "Linea"
-            << "Valor\n";
-            
+        std::cout << std::left
+                << std::setw(20) << "Nombre"
+                << std::setw(15) << "Tipo"
+                << std::setw(10) << "Linea"
+                << "Valor\n";
+
         for (const auto& [nombre, simbolo] : tablaSimbolos.simbolos) {
             std::cout << std::setw(20) << nombre
                     << std::setw(15) << tipoDatoToString(simbolo.tipo)
                     << std::setw(10) << simbolo.lineaDeclaracion
-                    << valorToString(simbolo.valor) << "\n";
+                    << simbolo.valor << "\n"; // Mostramos el valor
+        }
+    }*/
+    inline void imprimirTablaSimbolos() const {
+        std::cout << "\n\033[1;34mTabla de Simbolos\033[0m\n";
+        std::cout << "\033[1;37m+--------------------+---------------+----------+-------------------+\033[0m\n";
+        std::cout << "\033[1;37m| Nombre             | Tipo          | Linea    | Valor             |\033[0m\n";
+        std::cout << "\033[1;37m+--------------------+---------------+----------+-------------------+\033[0m\n";
+    
+        for (const auto& [nombre, simbolo] : tablaSimbolos.simbolos) {
+            std::cout << "| " << std::setw(18) << nombre
+                      << "| " << std::setw(14) << tipoDatoToString(simbolo.tipo)
+                      << "| " << std::setw(8) << simbolo.lineaDeclaracion
+                      << "| " << std::setw(17) << simbolo.valor << " |\n";
         }
     }
 
@@ -353,10 +366,10 @@ private:
         avanzar(); // Consumir TOKEN_BUCLE_PRINCIPAL
         
         while (actual().type != TOKEN_FIN_CONFIGURAR && !finalBloque()) {
-            std::cout << "Token S: " << actual().value 
+            /*std::cout << "Token S: " << actual().value 
             << " (Tipo: " << actual().type
             << ", Linea: " << actual().line 
-            << ", Columna: " << actual().column << ")" << std::endl;
+            << ", Columna: " << actual().column << ")" << std::endl;*/
             if (funcionesBuclePrincipal()) {
                 auto llamada = llamadaFuncion();
                 if (llamada) {
@@ -466,10 +479,29 @@ private:
             declaracion.identificador,
             declaracion.tipoDeclarado,
             declaracion.linea,
-            {} // Valor inicial
+            "" // Valor inicial
         };
+        // Si la declaración incluye una asignación, capturamos el valor
+        if (declaracion.expresion) {
+            if (declaracion.expresion->tipo == static_cast<TipoExpresion>(NODO_LITERAL)) {
+                simbolo.valor = static_cast<NodoLiteral*>(declaracion.expresion.get())->valor;
+            } else if (declaracion.expresion->tipo == static_cast<TipoExpresion>(NODO_VARIABLE)) {
+                // Si es una variable, buscamos su valor en la tabla de símbolos
+                std::string nombreVariable = static_cast<NodoVariable*>(declaracion.expresion.get())->nombre;
+                auto simboloVariable = tablaSimbolos.buscar(nombreVariable);
+                if (simboloVariable) {
+                    simbolo.valor = simboloVariable->valor;
+                }
+            }
+        }
         tablaSimbolos.insertar(simbolo);
     }
+    /*
+    std::cout << "Token S: " << declaracion.identificador 
+            << " (Tipo: " << declaracion.tipoDeclarado
+            << ", Linea: " << declaracion.linea 
+            << ", Valor: " << declaracion.expresion << ")" << std::endl;
+    */
 
     //--------------------------------------------------
     // Funciones utilitarias
