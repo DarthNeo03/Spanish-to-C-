@@ -39,18 +39,18 @@ int main(int argc, char* argv[]) {
         Parser parser(tokens, erroresGlobales);
         auto ast = parser.analizar();
 
-        
+        if (erroresGlobales.empty()) {
+            std::cout << "Analisis sintactico completado!" << std::endl;
+            parser.imprimirTablaSimbolos();
+        } else {
+            imprimirErrores(erroresGlobales);
+            std::cerr << "Analisis sintactico completado con errores!" << std::endl;
+        }    
     } catch (const std::bad_alloc&) {
         std::cerr << "\nERROR CRÍTICO: Memoria insuficiente. Verifique errores de bucle infinito\n";
         return EXIT_FAILURE;
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
-    }
-
-    imprimirErrores(erroresGlobales);
-    if (erroresGlobales.empty()) {
-        std::cout << "Analisis sintactico completado!" << std::endl;
-        //parser.imprimirTablaSimbolos();
     }
 
     // Cerrar el archivo

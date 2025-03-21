@@ -17,7 +17,7 @@ struct Simbolo {
     std::string nombre;
     TipoDato tipo;
     int lineaDeclaracion;
-    std::variant<int, float, std::string, bool> valor;
+    std::string valor;
 };
 
 class TablaSimbolos {
@@ -34,10 +34,6 @@ public:
     }
 
     void limpiar() { simbolos.clear(); }
-
-    void agregar(const std::string& nombre, TipoDato tipo, int linea, const std::variant<int, float, std::string, bool>& valor) {
-        simbolos[nombre] = {nombre, tipo, linea, valor}; // Asegurar almacenar valor real
-    }
 };
 
 inline std::string tipoDatoToString(TipoDato tipo) {

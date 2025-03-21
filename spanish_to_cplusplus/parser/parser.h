@@ -172,17 +172,17 @@ public:
     // Método para imprimir tabla de símbolos
     inline void imprimirTablaSimbolos() const {
         std::cout << "\nTabla de Simbolos:\n";
-        std::cout << std::left 
-            << std::setw(20) << "Nombre"
-            << std::setw(15) << "Tipo"
-            << std::setw(10) << "Linea"
-            << "Valor\n";
-            
+        std::cout << std::left
+                << std::setw(20) << "Nombre"
+                << std::setw(15) << "Tipo"
+                << std::setw(10) << "Linea"
+                << "Valor\n";
+
         for (const auto& [nombre, simbolo] : tablaSimbolos.simbolos) {
             std::cout << std::setw(20) << nombre
                     << std::setw(15) << tipoDatoToString(simbolo.tipo)
                     << std::setw(10) << simbolo.lineaDeclaracion
-                    << valorToString(simbolo.valor) << "\n";
+                    << simbolo.valor << "\n"; // Mostramos el valor
         }
     }
 
@@ -461,10 +461,29 @@ private:
             declaracion.identificador,
             declaracion.tipoDeclarado,
             declaracion.linea,
-            {} // Valor inicial
+            "" // Valor inicial
         };
+        // Si la declaración incluye una asignación, capturamos el valor
+        if (declaracion.expresion) {
+            if (declaracion.expresion->tipo == static_cast<TipoExpresion>(NODO_LITERAL)) {
+                simbolo.valor = static_cast<NodoLiteral*>(declaracion.expresion.get())->valor;
+            } else if (declaracion.expresion->tipo == static_cast<TipoExpresion>(NODO_VARIABLE)) {
+                // Si es una variable, buscamos su valor en la tabla de símbolos
+                std::string nombreVariable = static_cast<NodoVariable*>(declaracion.expresion.get())->nombre;
+                auto simboloVariable = tablaSimbolos.buscar(nombreVariable);
+                if (simboloVariable) {
+                    simbolo.valor = simboloVariable->valor;
+                }
+            }
+        }
         tablaSimbolos.insertar(simbolo);
     }
+    /*
+    std::cout << "Token S: " << declaracion.identificador 
+            << " (Tipo: " << declaracion.tipoDeclarado
+            << ", Linea: " << declaracion.linea 
+            << ", Valor: " << declaracion.expresion << ")" << std::endl;
+    */
 
     //--------------------------------------------------
     // Funciones utilitarias
