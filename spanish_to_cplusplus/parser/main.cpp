@@ -1,12 +1,22 @@
 #include "lexer.h"
 #include "parser.h"
+#include <iostream>
+#include <fstream>
+#include <vector>
 
-int main() {
+int main(int argc, char* argv[]) {
     std::vector<Error> erroresGlobales;
     std::string ruta;
-    std::cout << "Ingrese la ruta del archivo: ";
-    std::getline(std::cin, ruta);
 
+    // Verificar si se proporcionó un argumento (ruta del archivo)
+    if (argc > 1) {
+        ruta = argv[1]; // Usar el primer argumento como ruta
+    } else {
+        // Solicitar la ruta al usuario si no se proporcionó como argumento
+        std::cout << "Ingrese la ruta del archivo: ";
+        std::getline(std::cin, ruta);
+    }
+    // Intentar abrir el archivo
     std::ifstream archivo(ruta);
     if (!archivo.is_open()) {
         std::cerr << "Error: No se pudo abrir el archivo '" << ruta << "'." << std::endl;

@@ -348,10 +348,10 @@ private:
         avanzar(); // Consumir TOKEN_BUCLE_PRINCIPAL
         
         while (actual().type != TOKEN_FIN_CONFIGURAR && !finalBloque()) {
-            std::cout << "Token S: " << actual().value 
+            /*std::cout << "Token S: " << actual().value 
             << " (Tipo: " << actual().type
             << ", Linea: " << actual().line 
-            << ", Columna: " << actual().column << ")" << std::endl;
+            << ", Columna: " << actual().column << ")" << std::endl;*/
             if (funcionesBuclePrincipal()) {
                 auto llamada = llamadaFuncion();
                 if (llamada) {
