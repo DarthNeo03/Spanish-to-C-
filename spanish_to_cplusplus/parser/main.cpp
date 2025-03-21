@@ -5,6 +5,50 @@
 #include <fstream>
 #include <vector>
 
+void imprimirTokens(const std::vector<Token>& tokens) {
+    if (tokens.empty()) return;
+
+    // Definir anchos de columna
+    const int ANCHO_TOKEN = 18;
+    const int ANCHO_TIPO = 21;
+    const int ANCHO_LINEA = 6;
+    const int ANCHO_COLUMNA = 8;
+
+    // Bordes de la tabla
+    std::cout << std::left
+              << "\n+" << std::string(ANCHO_TOKEN + 1, '-') 
+              << "+" << std::string(ANCHO_TIPO + 1, '-')
+              << "+" << std::string(ANCHO_LINEA + 1, '-')
+              << "+" << std::string(ANCHO_COLUMNA, '-') << "+\n";
+
+    // Cabecera
+    std::cout << "| " << std::setw(ANCHO_TOKEN) << "Token"
+              << "| " << std::setw(ANCHO_TIPO) << "Tipo"
+              << "| " << std::setw(ANCHO_LINEA) << "Linea"
+              << "| " << std::setw(ANCHO_COLUMNA) << "Columna" << "|\n";
+
+    // Separador
+    std::cout << "+" << std::string(ANCHO_TOKEN + 1, '-') 
+              << "+" << std::string(ANCHO_TIPO + 1, '-')
+              << "+" << std::string(ANCHO_LINEA + 1, '-')
+              << "+" << std::string(ANCHO_COLUMNA, '-') << "+\n";
+
+    // Filas de datos
+    for (const auto& token : tokens) {
+        std::cout << "| " << std::setw(ANCHO_TOKEN) << token.value.substr(0, ANCHO_TOKEN)
+                  << "| " << std::setw(ANCHO_TIPO) << tokenTypeToString(token.type)
+                  << "| " << std::setw(ANCHO_LINEA) << token.line
+                  << "| " << std::setw(ANCHO_COLUMNA) << token.column << "|\n";
+    }
+
+    // Bordes inferiores
+    std::cout << "+" << std::string(ANCHO_TOKEN + 1, '-') 
+              << "+" << std::string(ANCHO_TIPO + 1, '-')
+              << "+" << std::string(ANCHO_LINEA + 1, '-')
+              << "+" << std::string(ANCHO_COLUMNA, '-') << "+\n";
+}
+
+
 int main(int argc, char* argv[]) {
     std::vector<Error> erroresGlobales;
     std::string ruta;
@@ -28,12 +72,14 @@ int main(int argc, char* argv[]) {
         // Realizar el análisis léxico
         auto tokens = analizadorLexico(archivo);
         // Imprimir los tokens reconocidos
-        for (const auto& token : tokens) {
+        std::cout << "\n\033[1;34mTabla de Simbolos\033[0m\n";
+        imprimirTokens(tokens);
+        /*for (const auto& token : tokens) {
             std::cout << "Token: " << token.value 
                     << " (Tipo: " << tokenTypeToString(token.type)
                     << ", Linea: " << token.line 
                     << ", Columna: " << token.column << ")" << std::endl;
-        }
+        }*/
         std::cout << "Analisis lexico completado!" << std::endl;
 
         // Realizar el análisis sintáctico
@@ -42,11 +88,12 @@ int main(int argc, char* argv[]) {
 
         if (erroresGlobales.empty()) {
             std::cout << "Analisis sintactico completado!" << std::endl;
-            parser.imprimirTablaSimbolos();
+            //parser.imprimirTablaSimbolos();
 
             AnalizadorSemantico semantico(erroresGlobales, parser.obtenerTablaSimbolos());
             semantico.analizar(ast.get());
             
+            std::cout << "\n\033[1;34mSALIDA!\033[0m\n";
             std::cout << "\nCodigo generado:\n";
             std::cout << semantico.obtenerCodigo() << "\n";
         } else {
