@@ -1,0 +1,100 @@
+/* Estilos generales */
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+
+.container {
+  width: 80%;
+  margin: 20px auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2 {
+  color: #333;
+}
+
+/* Estilos del formulario */
+form {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+input[type="file"] {
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Estilos del código compilado */
+#codigo-compilado {
+  background-color: #f0f0f0;
+  padding: 10px;
+  border-radius: 5px;
+  white-space: pre-wrap;
+}
+
+/* Estilos de las tablas */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+table, th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+/* Estilos del árbol sintáctico */
+#arbol-sintactico {
+  margin-top: 20px;
+  text-align: center;
+}
+
+#arbol-sintactico .nodo {
+  display: inline-block;
+  border: 1px solid #333;
+  padding: 10px;
+  margin: 5px;
+  border-radius: 5px;
+}
+
+#arbol-sintactico .hijos {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+#arbol-sintactico .linea {
+  width: 20px;
+  height: 2px;
+  background-color: #333;
+  margin: 0 10px;
+  align-self: center;
+}

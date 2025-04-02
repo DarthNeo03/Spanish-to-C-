@@ -1,0 +1,11 @@
+{
+  "name": "stcpp_gui",
+  "version": "0.9.0",
+  "description": "GUI del compilador en navegador web, a través de backend y frontend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Moisés Terán",
+  "license": "ISC"
+}

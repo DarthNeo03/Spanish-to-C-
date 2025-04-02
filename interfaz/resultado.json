@@ -1,0 +1,12 @@
+{
+  "tablaSimbolos": [
+    { "nombre": "contador", "tipo": "int", "valor": 5 },
+    { "nombre": "mensaje", "tipo": "string", "valor": "¡Hola mundo!" },
+    { "nombre": "temperatura", "tipo": "float", "valor": 25.5 }
+  ],
+  "tablaErrores": [
+    { "linea": 3, "columna": 10, "tipo": "sintactico", "descripcion": "Falta punto y coma" },
+    { "linea": 7, "columna": 20, "tipo": "semantico", "descripcion": "Variable no declarada" },
+    { "linea": 12, "columna": 5, "tipo": "lexico", "descripcion": "Identificador no válido" }
+  ]
+}

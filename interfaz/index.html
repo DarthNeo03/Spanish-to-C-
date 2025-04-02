@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compilador StC</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Compilador StC</h1>
+
+    <form id="form-compilador">
+      <label for="archivo-codigo">Selecciona el archivo de código:</label>
+      <input type="file" id="archivo-codigo" name="archivo" accept=".txt,.c,.cpp">
+      <button type="submit">Compilar</button>
+    </form>
+
+    <h2>Código Compilado</h2>
+    <pre id="codigo-compilado"></pre>
+
+    <h2>Tabla de Símbolos</h2>
+    <table id="tabla-simbolos"></table>
+
+    <h2>Tabla de Errores</h2>
+    <table id="tabla-errores"></table>
+
+    <h2>Árbol Sintáctico</h2>
+    <div id="arbol-sintactico">
+      <div class="nodo">
+        Programa
+        <div class="hijos">
+          <div class="nodo">
+            Declaraciones
+            <div class="hijos">
+              <div class="nodo">Variable</div>
+              <div class="nodo">Variable</div>
+            </div>
+          </div>
+          <div class="linea"></div>
+          <div class="nodo">
+            Sentencias
+            <div class="hijos">
+              <div class="nodo">Asignación</div>
+              <div class="nodo">Bucle</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2>Cargar JSON de Datos (Simulación)</h2>
+    <input type="file" id="archivo-json" accept=".json">
+    <button id="cargar-json">Cargar Datos JSON</button>
+  </div>
+
+  <script>
+    // Función para procesar los datos recibidos del backend
+    function procesarDatos(datos) {
+      // Obtener las tablas de símbolos y errores
+      const tablaSimbolos = datos.tablaSimbolos;
+      const tablaErrores = datos.tablaErrores;
+
+      // Generar la tabla de símbolos
+      const tablaSimbolosElement = document.getElementById("tabla-simbolos");
+      tablaSimbolosElement.innerHTML = ""; // Limpiar la tabla
+
+      // Crear la fila de encabezado
+      const encabezadoSimbolos = document.createElement("tr");
+      const encabezadoNombre = document.createElement("th");
+      encabezadoNombre.textContent = "Nombre";
+      const encabezadoTipo = document.createElement("th");
+      encabezadoTipo.textContent = "Tipo";
+      const encabezadoValor = document.createElement("th");
+      encabezadoValor.textContent = "Valor";
+      encabezadoSimbolos.appendChild(encabezadoNombre);
+      encabezadoSimbolos.appendChild(encabezadoTipo);
+      encabezadoSimbolos.appendChild(encabezadoValor);
+      tablaSimbolosElement.appendChild(encabezadoSimbolos);
+
+      // Crear las filas de datos
+      tablaSimbolos.forEach(simbolo => {
+        const fila = document.createElement("tr");
+        const celdaNombre = document.createElement("td");
+        celdaNombre.textContent = simbolo.nombre;
+        const celdaTipo = document.createElement("td");
+        celdaTipo.textContent = simbolo.tipo;
+        const celdaValor = document.createElement("td");
+        celdaValor.textContent = simbolo.valor;
+        fila.appendChild(celdaNombre);
+        fila.appendChild(celdaTipo);
+        fila.appendChild(celdaValor);
+        tablaSimbolosElement.appendChild(fila);
+      });
+
+      // Generar la tabla de errores
+      const tablaErroresElement = document.getElementById("tabla-errores");
+      tablaErroresElement.innerHTML = ""; // Limpiar la tabla
+
+      // Crear la fila de encabezado
+      const encabezadoErrores = document.createElement("tr");
+      const encabezadoLinea = document.createElement("th");
+      encabezadoLinea.textContent = "Línea";
+      const encabezadoColumna = document.createElement("th");
+      encabezadoColumna.textContent = "Columna";
+      const encabezadoTipoError = document.createElement("th"); // Cambiar el nombre de la variable aquí
+      encabezadoTipoError.textContent = "Tipo";
+      const encabezadoDescripcion = document.createElement("th");
+      encabezadoDescripcion.textContent = "Descripción";
+      encabezadoErrores.appendChild(encabezadoLinea);
+      encabezadoErrores.appendChild(encabezadoColumna);
+      encabezadoErrores.appendChild(encabezadoTipoError); // Usar el nuevo nombre de la variable aquí
+      encabezadoErrores.appendChild(encabezadoDescripcion);
+      tablaErroresElement.appendChild(encabezadoErrores);
+
+      // Crear las filas de datos
+      tablaErrores.forEach(error => {
+        const fila = document.createElement("tr");
+        const celdaLinea = document.createElement("td");
+        celdaLinea.textContent = error.linea;
+        const celdaColumna = document.createElement("td");
+        celdaColumna.textContent = error.columna;
+        const celdaTipo = document.createElement("td");
+        celdaTipo.textContent = error.tipo;
+        const celdaDescripcion = document.createElement("td");
+        celdaDescripcion.textContent = error.descripcion;
+        fila.appendChild(celdaLinea);
+        fila.appendChild(celdaColumna);
+        fila.appendChild(celdaTipo);
+        fila.appendChild(celdaDescripcion);
+        tablaErroresElement.appendChild(fila);
+      });
+    }
+
+    // Modificar la función para manejar la respuesta del backend
+    document.getElementById("form-compilador").addEventListener("submit", function(event) {
+      event.preventDefault(); // Evitar la recarga de la página
+
+      const archivo = document.getElementById("archivo-codigo").files[0];
+      const formData = new FormData();
+      formData.append("archivo", archivo);
+
+      fetch("/compilar", {
+        method: "POST",
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Mostrar el código compilado
+        document.getElementById("codigo-compilado").textContent = data.codigoCompilado;
+
+        // Procesar los datos para las tablas
+        procesarDatos(data.datos);
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("Ocurrió un error al procesar el archivo.");
+      });
+    });
+
+    // Event listener para cargar el JSON manualmente
+    document.getElementById("cargar-json").addEventListener("click", function() {
+      const archivoJson = document.getElementById("archivo-json").files[0];
+      if (archivoJson) {
+        const lector = new FileReader();
+        lector.onload = function(evento) {
+          try {
+            const datosJson = JSON.parse(evento.target.result);
+            procesarDatos(datosJson);
+          } catch (error) {
+            console.error("Error al parsear el JSON:", error);
+            alert("Error al cargar o procesar el archivo JSON.");
+          }
+        };
+        lector.readAsText(archivoJson);
+      } else {
+        alert("Por favor, selecciona un archivo JSON.");
+      }
+    });
+  </script>
+</body>
+</html>
