@@ -1,0 +1,16 @@
+programa TestLexer
+    incluir <"Arduino">
+    entero pin = 13;
+    cadena tipo = "SALIDA";
+    
+    configurar
+        configurar_pin(pin, tipo);
+    fin_configurar
+
+    bucle_principal
+        escribir(pin, "ALTO");
+        esperar(1000);
+        escribir(pin, "BAJO");
+        esperar(1000);
+    fin_bucle
+fin_programa

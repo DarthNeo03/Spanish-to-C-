@@ -1,0 +1,4 @@
+programa MiPrograma
+    entero contador = 10;
+    cadena mensaje = "Hola";
+fin_programa
