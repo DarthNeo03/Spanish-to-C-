@@ -31,7 +31,7 @@ app.post('/compilar', upload.single('archivo'), (req, res) => {
   const rutaOut = path.join(__dirname, 'out');
   const rutaTokens = path.join(rutaOut, 'tokens.json');
   const rutaErrores = path.join(rutaOut, 'errores.json');
-  const rutaArbol = path.join(rutaOut, 'arbol.json');
+  const rutaArbol = path.join(rutaOut, 'ast.json');
   const rutaCodigo = path.join(rutaOut, 'salida.cpp');
 
   // Asegurar que la carpeta 'out' exista
@@ -40,10 +40,10 @@ app.post('/compilar', upload.single('archivo'), (req, res) => {
   }
 
   // Limpiar la carpeta 'out' antes de la compilación
-  /*fs.readdirSync(rutaOut).forEach(file => {
+  fs.readdirSync(rutaOut).forEach(file => {
     const filePath = path.join(rutaOut, file);
     fs.unlinkSync(filePath);
-  });*/
+  });
 
   // Ejecutar el compilador
   exec(`${nombreEjecutable} ./uploads/${nombreArchivo}`, (error, stdout, stderr) => {
@@ -111,12 +111,12 @@ app.post('/compilar', upload.single('archivo'), (req, res) => {
       try {
         if (fs.existsSync(rutaTokens)) fs.unlinkSync(rutaTokens);
         if (fs.existsSync(rutaErrores)) fs.unlinkSync(rutaErrores);
-        //if (fs.existsSync(rutaArbol)) fs.unlinkSync(rutaArbol);
+        if (fs.existsSync(rutaArbol)) fs.unlinkSync(rutaArbol);
         if (fs.existsSync(rutaCodigo)) fs.unlinkSync(rutaCodigo);
       } catch (err) {
         console.error('Error al limpiar archivos de salida:', err);
       }
-    }, 100); // Esperar un poco para asegurar que se envíe la respuesta
+    }, 2000); // Esperar un poco para asegurar que se envíe la respuesta
   });
 });
 

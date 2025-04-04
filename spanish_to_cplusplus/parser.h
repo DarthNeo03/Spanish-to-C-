@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <iomanip>
+#include <nlohmann/json.hpp> // Para JSON
 
 //--------------------------------------------------
 // Estructuras del AST (Árbol de Sintaxis Abstracta)
@@ -204,7 +205,6 @@ public:
         }
     }
     
-
     std::string astToJson(const std::unique_ptr<NodoPrograma>& programa) {
     std::stringstream json;
     json << "{\n";
@@ -263,15 +263,73 @@ public:
             }
             json << "      ]\n";
         }
-        
+
         json << "    }";
         if (i != programa->declaraciones.size() - 1) json << ",";
         json << "\n";
     }
-    
+
     json << "  ]\n}";
     return json.str();
 }
+
+    // Nueva función para generar JSON usando nlohmann/json
+    inline std::string generarJsonAST(const std::unique_ptr<NodoPrograma>& programa, bool prettyPrint = true) const {
+        nlohmann::json json_ast;
+        json_ast["tipo"] = "Programa";
+        nlohmann::json declaraciones_array = nlohmann::json::array();
+        for (const auto& decl : programa->declaraciones) {
+            nlohmann::json decl_json;
+            decl_json["tipo"] = tipoNodoToString(decl->tipo);
+            if (auto nodoDecl = dynamic_cast<NodoDeclaracion*>(decl.get())) {
+                decl_json["identificador"] = nodoDecl->identificador;
+                decl_json["tipoDato"] = tipoDatoToString(nodoDecl->tipoDeclarado);
+                if (nodoDecl->expresion) {
+                    decl_json["valor"] = obtenerValorExpresion(nodoDecl->expresion.get());
+                }
+            } else if (auto nodoConfig = dynamic_cast<NodoConfigurar*>(decl.get())) {
+                nlohmann::json instrucciones_array = nlohmann::json::array();
+                for (const auto& instruccion : nodoConfig->instrucciones) {
+                    if (auto llamada = dynamic_cast<NodoLlamadaFuncion*>(instruccion.get())) {
+                        nlohmann::json llamada_json;
+                        llamada_json["tipo"] = "LLAMADA_FUNCION";
+                        llamada_json["nombre"] = llamada->nombre;
+                        nlohmann::json argumentos_array = nlohmann::json::array();
+                        for (const auto& arg : llamada->argumentos) {
+                            argumentos_array.push_back(obtenerValorExpresion(arg.get()));
+                        }
+                        llamada_json["argumentos"] = argumentos_array;
+                        instrucciones_array.push_back(llamada_json);
+                    }
+                }
+                decl_json["instrucciones"] = instrucciones_array;
+            } else if (auto nodoBucle = dynamic_cast<NodoBuclePrincipal*>(decl.get())) {
+                nlohmann::json instrucciones_array = nlohmann::json::array();
+                for (const auto& instruccion : nodoBucle->instrucciones) {
+                    if (auto llamada = dynamic_cast<NodoLlamadaFuncion*>(instruccion.get())) {
+                        nlohmann::json llamada_json;
+                        llamada_json["tipo"] = "LLAMADA_FUNCION";
+                        llamada_json["nombre"] = llamada->nombre;
+                        nlohmann::json argumentos_array = nlohmann::json::array();
+                        for (const auto& arg : llamada->argumentos) {
+                            argumentos_array.push_back(obtenerValorExpresion(arg.get()));
+                        }
+                        llamada_json["argumentos"] = argumentos_array;
+                        instrucciones_array.push_back(llamada_json);
+                    }
+                }
+                decl_json["instrucciones"] = instrucciones_array;
+            }
+            declaraciones_array.push_back(decl_json);
+        }
+        json_ast["declaraciones"] = declaraciones_array;
+
+        if (prettyPrint) {
+            return json_ast.dump(4); // Indentación de 4 espacios para mejor legibilidad
+        } else {
+            return json_ast.dump();
+        }
+    }
 
 // Actualizar la función tipoNodoToString
 static std::string tipoNodoToString(TipoNodo tipo) {

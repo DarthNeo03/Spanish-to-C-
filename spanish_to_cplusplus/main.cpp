@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
 
             // Guardar el AST en un archivo JSON
             std::ofstream jsonAst("./out/ast.json");
-            jsonAst << parser.astToJson(ast) << std::endl;
+            jsonAst << parser.generarJsonAST(ast) << std::endl;
             jsonAst.close();
 
             // Realizar el análisis semántico

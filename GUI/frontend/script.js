@@ -44,35 +44,48 @@ function mostrarArbolSintactico(arbol) {
     return;
   }
 
-  function crearNodoArbol(nodo) {
-    const nodoDiv = document.createElement("div");
-    nodoDiv.classList.add("nodo-arbol");
-    nodoDiv.textContent = nodo.nodo || nodo.tipo || nodo.token || "Nodo";
-    if (nodo.nombre) nodoDiv.textContent += ` (${nodo.nombre})`;
-    if (nodo.valor) nodoDiv.textContent += `: ${nodo.valor}`;
-    if (nodo.condicion) nodoDiv.textContent += ` (${nodo.condicion})`;
+  // Crear un contenedor para el árbol (necesario para algunas librerías)
+  const treeContainer = document.createElement('div');
+  arbolSintacticoElement.appendChild(treeContainer);
 
-    if (nodo.hijos && nodo.hijos.length > 0) {
-      const hijosDiv = document.createElement("div");
-      hijosDiv.classList.add("hijos-arbol");
-      nodo.hijos.forEach(hijo => {
-        const linea = document.createElement("div");
-        linea.classList.add("linea-arbol");
-        const hijoNodo = crearNodoArbol(hijo);
-        hijosDiv.appendChild(linea);
-        hijosDiv.appendChild(hijoNodo);
-      });
-      nodoDiv.appendChild(hijosDiv);
+  // Usando la librería jsTree (asegúrate de incluirla en tu HTML)
+  $(treeContainer).jstree({
+    core: {
+      data: [convertirFormatoArbol(arbol)],
+      themes: {
+        dots: true,
+        icons: false
+      },
+      animation: 200
     }
-    return nodoDiv;
+  });
+}
+
+function convertirFormatoArbol(nodo) {
+  let textoNodo = nodo.tipo || 'Nodo';
+  const children = [];
+
+  if (nodo.identificador) textoNodo += ` (${nodo.identificador})`;
+  if (nodo.tipoDato) textoNodo += `: ${nodo.tipoDato}`;
+  if (nodo.valor) textoNodo += ` = ${nodo.valor}`;
+  if (nodo.nombre) textoNodo += `: ${nodo.nombre}`;
+  if (nodo.argumentos) textoNodo += ` (${nodo.argumentos ? nodo.argumentos.join(', ') : ''})`;
+  if (nodo.condicion) textoNodo += ` (${nodo.condicion})`;
+
+  if (nodo.declaraciones) {
+    nodo.declaraciones.forEach(decl => children.push(convertirFormatoArbol(decl)));
+  }
+  if (nodo.instrucciones) {
+    nodo.instrucciones.forEach(inst => children.push(convertirFormatoArbol(inst)));
+  }
+  if (nodo.hijos) {
+    nodo.hijos.forEach(child => children.push(convertirFormatoArbol(child)));
   }
 
-  if (arbol) {
-    const raizNodo = crearNodoArbol(arbol);
-    arbolSintacticoElement.appendChild(raizNodo);
-  } else {
-    arbolSintacticoElement.textContent = "El árbol sintáctico no se generó.";
-  }
+  return {
+    text: textoNodo,
+    children: children
+  };
 }
 
 // Modificar la función para manejar la respuesta del backend
