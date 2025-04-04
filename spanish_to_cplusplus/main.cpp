@@ -114,7 +114,7 @@ int main(int argc, char* argv[]) {
             if (!erroresGlobales.empty()) {
                 GeneradorJSON::generarJsonError(
                     erroresGlobales,
-                    "errores_compilacion.json"
+                    "errores.json"
                 );
             }
         }   
