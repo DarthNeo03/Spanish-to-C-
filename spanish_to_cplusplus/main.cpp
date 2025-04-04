@@ -1,6 +1,8 @@
 #include "lexer.h"
 #include "parser.h"
 #include "semantic.h"
+#include "jsonParser.h"
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -8,7 +10,15 @@
 #include <iomanip>
 
 void imprimirTokens(const std::vector<Token>& tokens) {
+    // Verificar si la lista de tokens está vacía
     if (tokens.empty()) return;
+
+    /*for (const auto& token : tokens) {
+            std::cout << "Token: " << token.value 
+                    << " (Tipo: " << tokenTypeToString(token.type)
+                    << ", Linea: " << token.line 
+                    << ", Columna: " << token.column << ")" << std::endl;
+        }*/
 
     // Definir anchos de columna
     const int ANCHO_TOKEN = 18;
@@ -48,6 +58,10 @@ void imprimirTokens(const std::vector<Token>& tokens) {
               << "+" << std::string(ANCHO_TIPO + 1, '-')
               << "+" << std::string(ANCHO_LINEA + 1, '-')
               << "+" << std::string(ANCHO_COLUMNA + 1, '-') << "+\033[0m\n";
+
+
+    // Generar JSON de tokens
+    GeneradorJSON::generarJsonTokens(tokens, "tokens.json");
 }
 
 
@@ -76,22 +90,18 @@ int main(int argc, char* argv[]) {
         // Imprimir los tokens reconocidos
         std::cout << "\n\033[1;34mTabla de Simbolos\033[0m\n";
         imprimirTokens(tokens);
-        /*for (const auto& token : tokens) {
-            std::cout << "Token: " << token.value 
-                    << " (Tipo: " << tokenTypeToString(token.type)
-                    << ", Linea: " << token.line 
-                    << ", Columna: " << token.column << ")" << std::endl;
-        }*/
-        std::cout << "Analisis lexico completado!" << std::endl;
+        std::cout << "Analisis lexico completado! \nIniciando analisis sintactico" << std::endl;
 
         // Realizar el análisis sintáctico
         Parser parser(tokens, erroresGlobales);
         auto ast = parser.analizar();
 
         if (erroresGlobales.empty()) {
-            std::cout << "Analisis sintactico completado!" << std::endl;
+            std::cout << "Analisis sintactico completado exitosamente!" << std::endl;
             //parser.imprimirTablaSimbolos();
+            //GeneradorJSON::generarJsonSimbolos(parser.obtenerTablaSimbolos(), "simbolos.json");
 
+            // Realizar el análisis semántico
             AnalizadorSemantico semantico(erroresGlobales, parser.obtenerTablaSimbolos());
             semantico.analizar(ast.get());
             
@@ -100,10 +110,15 @@ int main(int argc, char* argv[]) {
             std::cout << semantico.obtenerCodigo() << "\n";
         } else {
             imprimirErrores(erroresGlobales);
-            std::cerr << "Analisis sintactico completado con errores!" << std::endl;
+            std::cerr << "Analisis completado con errores!" << std::endl;
+            if (!erroresGlobales.empty()) {
+                GeneradorJSON::generarJsonError(
+                    erroresGlobales,
+                    "errores_compilacion.json"
+                );
+            }
         }   
 
-         
     } catch (const std::bad_alloc&) {
         std::cerr << "\nERROR CRÍTICO: Memoria insuficiente. Verifique errores de bucle infinito\n";
         return EXIT_FAILURE;
