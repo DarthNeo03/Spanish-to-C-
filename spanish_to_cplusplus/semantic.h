@@ -1,4 +1,3 @@
-// semantic.h
 #ifndef SEMANTIC_H
 #define SEMANTIC_H
 
@@ -84,11 +83,11 @@ void generarDeclaracion(NodoDeclaracion* decl) {
                         tipoCpp = "int";
                         valorTraducido = "INPUT";
                     }
-                    else if (valor == "ALTO") { // Nuevo caso
+                    else if (valor == "ALTO") { 
                         tipoCpp = "int";
                         valorTraducido = "HIGH";
                     }
-                    else if (valor == "BAJO") { // Nuevo caso
+                    else if (valor == "BAJO") {
                         tipoCpp = "int";
                         valorTraducido = "LOW";
                     }
@@ -148,7 +147,6 @@ void generarDeclaracion(NodoDeclaracion* decl) {
     }
 
     for (size_t i = 0; i < llamada->argumentos.size(); ++i) {
-        // Verificar si es un literal de tipo CADENA
         if (auto lit = dynamic_cast<NodoLiteral*>(llamada->argumentos[i].get())) {
             if (lit->tipoDato == "CADENA") {
                 std::string valor = lit->valor;
