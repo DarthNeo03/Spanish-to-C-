@@ -179,3 +179,4 @@ dist
 
 # VS Code
 .vscode/
+lib/
