@@ -87,7 +87,7 @@ function procesarDatos(datos) {
     const formData = new FormData();
     formData.append("archivo", archivo);
   
-    fetch("/compilar", {
+    fetch("http://localhost:3000/compilar", {
       method: "POST",
       body: formData
     })
