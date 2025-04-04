@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
     
     try {
         // Realizar el análisis léxico
-        auto tokens = analizadorLexico(archivo);
+        auto tokens = analizadorLexico(archivo, erroresGlobales);
         // Imprimir los tokens reconocidos
         std::cout << "\n\033[1;34mTabla de Simbolos\033[0m\n";
         imprimirTokens(tokens);
