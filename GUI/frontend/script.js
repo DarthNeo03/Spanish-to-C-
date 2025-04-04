@@ -56,7 +56,9 @@ function procesarDatos(datos) {
     tablaErroresElement.appendChild(encabezadoErrores);
   
     // Crear las filas de datos
-    datos.errores.forEach(error => {
+    const errores = datos.errores.tablaErrores || []; // Asegurarse de que errores sea un array
+    console.log(errores); // Verificar el contenido de errores
+    errores.forEach(error => {
       const fila = document.createElement("tr");
       const celdaLinea = document.createElement("td");
       celdaLinea.textContent = error.linea;

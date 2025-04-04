@@ -86,15 +86,17 @@ int main(int argc, char* argv[]) {
         auto tokens = analizadorLexico(archivo, erroresGlobales);
         std::cout << "\n\033[1;34mTabla de Simbolos\033[0m\n";
         imprimirTokens(tokens);
-        std::cout << "Analisis lexico completado!" << std::endl;
         std::cout << "Analisis lexico completado! \nIniciando analisis sintactico" << std::endl;
 
         Parser parser(tokens, erroresGlobales);
         auto ast = parser.analizar();
 
         if (erroresGlobales.empty()) {
-            std::cout << "Analisis sintactico completado!" << std::endl;
+            std::cout << "Analisis sintactico completado! \nIniciando analisis semantico" << std::endl;
+            //parser.imprimirTablaSimbolos();
+            //GeneradorJSON::generarJsonSimbolos(parser.obtenerTablaSimbolos(), "simbolos.json");
 
+            // Guardar el AST en un archivo JSON
             std::ofstream jsonAst("ast.json");
             jsonAst << parser.astToJson(ast) << std::endl;
             jsonAst.close();
@@ -109,7 +111,7 @@ int main(int argc, char* argv[]) {
             if (erroresGlobales.empty()) {
                 std::cout << "\n\033[1;32mCodigo generado exitosamente en salida.cpp!\033[0m\n";
             } else {
-                ::imprimirErrores(erroresGlobales);
+                //::imprimirErrores(erroresGlobales);
                 std::cerr << "Error al guardar el archivo de salida." << std::endl;
             }
         } else {

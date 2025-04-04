@@ -29,7 +29,7 @@ app.post('/compilar', upload.single('archivo'), (req, res) => {
   const nombreEjecutable = os.platform() === 'win32' ? 'compiladorStC.exe' : 'compiladorStC.out';
 
   // Ejecutar el compilador
-  exec(`cd ./out && ${nombreEjecutable} ${archivoSubido}`, (error, stdout, stderr) => {
+  exec(`cd ./out && ${nombreEjecutable} ../uploads/${nombreArchivo}`, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error al ejecutar el compilador: ${error}`);
       return res.status(500).json({ error: 'Error al ejecutar el compilador' });
@@ -37,13 +37,18 @@ app.post('/compilar', upload.single('archivo'), (req, res) => {
 
     // Leer los archivos de salida
     const rutaErrores = path.join(__dirname, 'out', 'errores.json');
-    const rutaSimbolos = path.join(__dirname, 'out', 'simbolos.json');
-    const rutaArbol = path.join(__dirname, 'out', 'arbol.json');
-    const rutaCodigo = path.join(__dirname, 'out', 'codigo.cpp');
+    const rutaSimbolos = path.join(__dirname, 'out', 'tokens.json');
+    const rutaArbol = path.join(__dirname, 'out', 'ast.json');
+    const rutaCodigo = path.join(__dirname, 'out', 'salida.cpp');
 
     try {
       const errores = JSON.parse(fs.readFileSync(rutaErrores, 'utf8'));
       const simbolos = JSON.parse(fs.readFileSync(rutaSimbolos, 'utf8'));
+      if (errores.length > 0) {
+        // Si hay errores, no se procesan los demás archivos
+        // Enviar los errores al frontend
+        return res.status(400).json({ errores: errores, simbolos: simbolos, arbol: null, codigoCompilado: null });
+      }
       const arbol = JSON.parse(fs.readFileSync(rutaArbol, 'utf8'));
       const codigoCompilado = fs.readFileSync(rutaCodigo, 'utf8');
 
@@ -62,8 +67,8 @@ app.post('/compilar', upload.single('archivo'), (req, res) => {
       fs.unlinkSync(archivoSubido);
       fs.unlinkSync(rutaErrores);
       fs.unlinkSync(rutaSimbolos);
-      fs.unlinkSync(rutaArbol);
-      fs.unlinkSync(rutaCodigo);
+      //fs.unlinkSync(rutaArbol);
+      //fs.unlinkSync(rutaCodigo);
     }
   });
 });
