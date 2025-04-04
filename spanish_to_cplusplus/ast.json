@@ -1,0 +1,55 @@
+{
+  "tipo": "Programa",
+  "declaraciones": [
+    {
+      "tipo": "INCLUIR",
+    },
+    {
+      "tipo": "DECLARACION",
+      "identificador": "pin",
+      "tipoDato": "ENTERO",
+      "valor": "13"
+    },
+    {
+      "tipo": "DECLARACION",
+      "identificador": "tipo",
+      "tipoDato": "CADENA",
+      "valor": "SALIDA"
+    },
+    {
+      "tipo": "CONFIGURAR",
+      "instrucciones": [
+        {
+          "tipo": "LLAMADA_FUNCION",
+          "nombre": "configurar_pin",
+          "argumentos": ["pin", "tipo"]
+        }
+      ]
+    },
+    {
+      "tipo": "BUCLE_PRINCIPAL",
+      "instrucciones": [
+        {
+          "tipo": "LLAMADA_FUNCION",
+          "nombre": "escribir",
+          "argumentos": ["pin", "ALTO"]
+        },
+        {
+          "tipo": "LLAMADA_FUNCION",
+          "nombre": "esperar",
+          "argumentos": ["1000"]
+        },
+        {
+          "tipo": "LLAMADA_FUNCION",
+          "nombre": "escribir",
+          "argumentos": ["pin", "BAJO"]
+        },
+        {
+          "tipo": "LLAMADA_FUNCION",
+          "nombre": "esperar",
+          "argumentos": ["1000"]
+        }
+      ]
+    }
+  ]
+}

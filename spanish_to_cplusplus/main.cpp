@@ -69,15 +69,13 @@ int main(int argc, char* argv[]) {
     std::vector<Error> erroresGlobales;
     std::string ruta;
 
-    // Verificar si se proporcionó un argumento (ruta del archivo)
     if (argc > 1) {
-        ruta = argv[1]; // Usar el primer argumento como ruta
+        ruta = argv[1];
     } else {
-        // Solicitar la ruta al usuario si no se proporcionó como argumento
         std::cout << "Ingrese la ruta del archivo: ";
         std::getline(std::cin, ruta);
     }
-    // Intentar abrir el archivo
+
     std::ifstream archivo(ruta);
     if (!archivo.is_open()) {
         std::cerr << "Error: No se pudo abrir el archivo '" << ruta << "'." << std::endl;
@@ -85,31 +83,37 @@ int main(int argc, char* argv[]) {
     }
     
     try {
-        // Realizar el análisis léxico
         auto tokens = analizadorLexico(archivo, erroresGlobales);
-        // Imprimir los tokens reconocidos
         std::cout << "\n\033[1;34mTabla de Simbolos\033[0m\n";
         imprimirTokens(tokens);
+        std::cout << "Analisis lexico completado!" << std::endl;
         std::cout << "Analisis lexico completado! \nIniciando analisis sintactico" << std::endl;
 
-        // Realizar el análisis sintáctico
         Parser parser(tokens, erroresGlobales);
         auto ast = parser.analizar();
 
         if (erroresGlobales.empty()) {
-            std::cout << "Analisis sintactico completado exitosamente!" << std::endl;
-            //parser.imprimirTablaSimbolos();
-            //GeneradorJSON::generarJsonSimbolos(parser.obtenerTablaSimbolos(), "simbolos.json");
+            std::cout << "Analisis sintactico completado!" << std::endl;
+
+            std::ofstream jsonAst("ast.json");
+            jsonAst << parser.astToJson(ast) << std::endl;
+            jsonAst.close();
 
             // Realizar el análisis semántico
             AnalizadorSemantico semantico(erroresGlobales, parser.obtenerTablaSimbolos());
             semantico.analizar(ast.get());
             
-            std::cout << "\n\033[1;34mSALIDA!\033[0m\n";
-            std::cout << "\nCodigo generado:\n";
-            std::cout << semantico.obtenerCodigo() << "\n";
+            // Guardar en archivo y manejar errores
+            semantico.guardarEnArchivo("salida.cpp");
+            
+            if (erroresGlobales.empty()) {
+                std::cout << "\n\033[1;32mCodigo generado exitosamente en salida.cpp!\033[0m\n";
+            } else {
+                ::imprimirErrores(erroresGlobales);
+                std::cerr << "Error al guardar el archivo de salida." << std::endl;
+            }
         } else {
-            imprimirErrores(erroresGlobales);
+            ::imprimirErrores(erroresGlobales);
             std::cerr << "Analisis completado con errores!" << std::endl;
             if (!erroresGlobales.empty()) {
                 GeneradorJSON::generarJsonError(
@@ -119,6 +123,7 @@ int main(int argc, char* argv[]) {
             }
         }   
 
+         
     } catch (const std::bad_alloc&) {
         std::cerr << "\nERROR CRÍTICO: Memoria insuficiente. Verifique errores de bucle infinito\n";
         return EXIT_FAILURE;
@@ -126,8 +131,6 @@ int main(int argc, char* argv[]) {
         std::cerr << "Error: " << e.what() << std::endl;
     }
 
-    // Cerrar el archivo
     archivo.close();    
-
     return 0;
 }
