@@ -119,25 +119,30 @@ document.getElementById("form-compilador").addEventListener("submit", function(e
   });
 });
 
-// Event listener para cargar el JSON manualmente
-document.getElementById("cargar-json").addEventListener("click", function() {
-  const archivoJson = document.getElementById("archivo-json").files[0];
-  if (archivoJson) {
-    const lector = new FileReader();
-    lector.onload = function(evento) {
-      try {
-        const datosJson = JSON.parse(evento.target.result);
-        document.getElementById("codigo-compilado").textContent = datosJson.codigoCompilado || "";
-        mostrarTabla("tabla-tokens", datosJson.tablaTokens);
-        mostrarTabla("tabla-errores", datosJson.tablaErrores);
-        mostrarArbolSintactico(datosJson.arbol);
-      } catch (error) {
-        console.error("Error al parsear el JSON:", error);
-        alert("Error al cargar o procesar el archivo JSON.");
-      }
-    };
-    lector.readAsText(archivoJson);
-  } else {
-    alert("Por favor, selecciona un archivo JSON.");
-  }
+// Event listener para descargar el manual
+document.addEventListener('DOMContentLoaded', () => {
+  const descargarManualBtn = document.getElementById('descargar-manual');
+  descargarManualBtn.addEventListener('click', () => {
+    fetch('http://localhost:3000/descargar-manual')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.blob();
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'manual_compilador_stc.pdf'; // Nombre del archivo a descargar
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      })
+      .catch(error => {
+        console.error('Error al descargar el manual:', error);
+        alert('No se pudo descargar el manual.');
+      });
+  });
 });

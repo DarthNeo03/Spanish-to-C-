@@ -120,6 +120,25 @@ app.post('/compilar', upload.single('archivo'), (req, res) => {
   });
 });
 
+// Ruta para descargar el manual
+app.get('/descargar-manual', (req, res) => {
+  const manualPath = path.join(__dirname, 'docs', 'manual_compilador_stc.pdf');
+
+  fs.access(manualPath, fs.constants.R_OK, (err) => {
+    if (err) {
+      console.error('No se pudo encontrar o leer el manual:', err);
+      return res.status(404).send('Manual no encontrado');
+    }
+
+    res.download(manualPath, 'manual_compilador_stc.pdf', (error) => {
+      if (error) {
+        console.error('Error al descargar el manual:', error);
+        return res.status(500).send('Error al descargar el manual');
+      }
+    });
+  });
+});
+
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);
