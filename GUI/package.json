@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon --watch index.js"
   },
   "author": "Moisés Terán & José Simón García",
   "license": "ISC",
@@ -13,5 +13,8 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "multer": "^1.4.5-lts.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
   }
 }

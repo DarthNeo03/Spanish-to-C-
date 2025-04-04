@@ -61,7 +61,7 @@ void imprimirTokens(const std::vector<Token>& tokens) {
 
 
     // Generar JSON de tokens
-    GeneradorJSON::generarJsonTokens(tokens, "tokens.json");
+    GeneradorJSON::generarJsonTokens(tokens, "./out/tokens.json");
 }
 
 
@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
             //GeneradorJSON::generarJsonSimbolos(parser.obtenerTablaSimbolos(), "simbolos.json");
 
             // Guardar el AST en un archivo JSON
-            std::ofstream jsonAst("ast.json");
+            std::ofstream jsonAst("./out/ast.json");
             jsonAst << parser.astToJson(ast) << std::endl;
             jsonAst.close();
 
@@ -106,7 +106,7 @@ int main(int argc, char* argv[]) {
             semantico.analizar(ast.get());
             
             // Guardar en archivo y manejar errores
-            semantico.guardarEnArchivo("salida.cpp");
+            semantico.guardarEnArchivo("./out/salida.cpp");
             
             if (erroresGlobales.empty()) {
                 std::cout << "\n\033[1;32mCodigo generado exitosamente en salida.cpp!\033[0m\n";
@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
             if (!erroresGlobales.empty()) {
                 GeneradorJSON::generarJsonError(
                     erroresGlobales,
-                    "errores.json"
+                    "./out/errores.json"
                 );
             }
         }   
