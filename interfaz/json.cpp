@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include <nlohmann/json.hpp> // Debes instalar esta biblioteca: https://github.com/nlohmann/json
+#include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
 

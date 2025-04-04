@@ -1,0 +1,14 @@
+{
+    "errores": [
+        "Error en la línea 3: variable no declarada"
+    ],
+    "tabla_simbolos": [
+        "a: int",
+        "b: float"
+    ],
+    "tokens": [
+        "INICIO",
+        "VAR",
+        "ASIGNACION"
+    ]
+}
