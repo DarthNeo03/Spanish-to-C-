@@ -59,7 +59,7 @@ private:
     codigoIntermedio << "}\n";
 }
 
-    void generarDeclaracion(NodoDeclaracion* decl) {
+void generarDeclaracion(NodoDeclaracion* decl) {
     std::string tipoCpp;
     std::string valorTraducido = "";
     
@@ -72,15 +72,25 @@ private:
             break;
         case CADENA: 
             tipoCpp = "String";
-            // Traducir "SALIDA" a OUTPUT si es una cadena
+            // Traducir valores especiales
             if (decl->expresion) {
                 if (auto lit = dynamic_cast<NodoLiteral*>(decl->expresion.get())) {
-                    if (lit->valor == "SALIDA") {
+                    std::string valor = lit->valor;
+                    if (valor == "SALIDA") {
                         tipoCpp = "int";
                         valorTraducido = "OUTPUT";
-                    } else if (lit->valor == "ENTRADA") {
+                    } 
+                    else if (valor == "ENTRADA") {
                         tipoCpp = "int";
                         valorTraducido = "INPUT";
+                    }
+                    else if (valor == "ALTO") { // Nuevo caso
+                        tipoCpp = "int";
+                        valorTraducido = "HIGH";
+                    }
+                    else if (valor == "BAJO") { // Nuevo caso
+                        tipoCpp = "int";
+                        valorTraducido = "LOW";
                     }
                 }
             }
