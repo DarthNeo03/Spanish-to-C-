@@ -4,6 +4,8 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <string>
+#include <iomanip>
 
 void imprimirTokens(const std::vector<Token>& tokens) {
     if (tokens.empty()) return;
@@ -14,24 +16,24 @@ void imprimirTokens(const std::vector<Token>& tokens) {
     const int ANCHO_LINEA = 6;
     const int ANCHO_COLUMNA = 8;
 
-    // Bordes de la tabla
-    std::cout << std::left
+    // Bordes de la tabla en azul
+    std::cout << "\033[1;34m" << std::left
               << "\n+" << std::string(ANCHO_TOKEN + 1, '-') 
               << "+" << std::string(ANCHO_TIPO + 1, '-')
               << "+" << std::string(ANCHO_LINEA + 1, '-')
-              << "+" << std::string(ANCHO_COLUMNA, '-') << "+\n";
+              << "+" << std::string(ANCHO_COLUMNA + 1, '-') << "+\033[0m\n";
 
-    // Cabecera
-    std::cout << "| " << std::setw(ANCHO_TOKEN) << "Token"
+    // Cabecera en azul
+    std::cout << "\033[1;34m| " << std::setw(ANCHO_TOKEN) << "Token"
               << "| " << std::setw(ANCHO_TIPO) << "Tipo"
               << "| " << std::setw(ANCHO_LINEA) << "Linea"
-              << "| " << std::setw(ANCHO_COLUMNA) << "Columna" << "|\n";
+              << "| " << std::setw(ANCHO_COLUMNA) << "Columna" << "|\033[0m\n";
 
-    // Separador
-    std::cout << "+" << std::string(ANCHO_TOKEN + 1, '-') 
+    // Separador en azul
+    std::cout << "\033[1;34m+" << std::string(ANCHO_TOKEN + 1, '-') 
               << "+" << std::string(ANCHO_TIPO + 1, '-')
               << "+" << std::string(ANCHO_LINEA + 1, '-')
-              << "+" << std::string(ANCHO_COLUMNA, '-') << "+\n";
+              << "+" << std::string(ANCHO_COLUMNA + 1, '-') << "+\033[0m\n";
 
     // Filas de datos
     for (const auto& token : tokens) {
@@ -41,11 +43,11 @@ void imprimirTokens(const std::vector<Token>& tokens) {
                   << "| " << std::setw(ANCHO_COLUMNA) << token.column << "|\n";
     }
 
-    // Bordes inferiores
-    std::cout << "+" << std::string(ANCHO_TOKEN + 1, '-') 
+    // Bordes inferiores en azul
+    std::cout << "\033[1;34m+" << std::string(ANCHO_TOKEN + 1, '-') 
               << "+" << std::string(ANCHO_TIPO + 1, '-')
               << "+" << std::string(ANCHO_LINEA + 1, '-')
-              << "+" << std::string(ANCHO_COLUMNA, '-') << "+\n";
+              << "+" << std::string(ANCHO_COLUMNA + 1, '-') << "+\033[0m\n";
 }
 
 
