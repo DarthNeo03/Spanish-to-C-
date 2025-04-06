@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <iomanip>
+#include <nlohmann/json.hpp> // Para JSON
 
 //--------------------------------------------------
 // Estructuras del AST (Árbol de Sintaxis Abstracta)
@@ -203,6 +204,148 @@ public:
                       << "| " << std::setw(17) << simbolo.valor << " |\n";
         }
     }
+    
+    std::string astToJson(const std::unique_ptr<NodoPrograma>& programa) {
+    std::stringstream json;
+    json << "{\n";
+    json << "  \"tipo\": \"Programa\",\n";
+    json << "  \"declaraciones\": [\n";
+    
+    for (size_t i = 0; i < programa->declaraciones.size(); ++i) {
+        const auto& decl = programa->declaraciones[i];
+        json << "    {\n";
+        json << "      \"tipo\": \"" << tipoNodoToString(decl->tipo) << "\",\n";
+        
+        if (auto nodoDecl = dynamic_cast<NodoDeclaracion*>(decl.get())) {
+            json << "      \"identificador\": \"" << nodoDecl->identificador << "\",\n";
+            json << "      \"tipoDato\": \"" << tipoDatoToString(nodoDecl->tipoDeclarado) << "\",\n";
+            if (nodoDecl->expresion) {
+                json << "      \"valor\": \"" << obtenerValorExpresion(nodoDecl->expresion.get()) << "\"\n";
+            }
+        }
+        else if (auto nodoConfig = dynamic_cast<NodoConfigurar*>(decl.get())) {
+            json << "      \"instrucciones\": [\n";
+            for (size_t j = 0; j < nodoConfig->instrucciones.size(); ++j) {
+                if (auto llamada = dynamic_cast<NodoLlamadaFuncion*>(nodoConfig->instrucciones[j].get())) {
+                    json << "        {\n";
+                    json << "          \"tipo\": \"LLAMADA_FUNCION\",\n";
+                    json << "          \"nombre\": \"" << llamada->nombre << "\",\n";
+                    json << "          \"argumentos\": [";
+                    for (size_t k = 0; k < llamada->argumentos.size(); ++k) {
+                        json << "\"" << obtenerValorExpresion(llamada->argumentos[k].get()) << "\"";
+                        if (k != llamada->argumentos.size() - 1) json << ", ";
+                    }
+                    json << "]\n";
+                    json << "        }";
+                    if (j != nodoConfig->instrucciones.size() - 1) json << ",";
+                    json << "\n";
+                }
+            }
+            json << "      ]\n";
+        }
+        else if (auto nodoBucle = dynamic_cast<NodoBuclePrincipal*>(decl.get())) {
+            json << "      \"instrucciones\": [\n";
+            for (size_t j = 0; j < nodoBucle->instrucciones.size(); ++j) {
+                if (auto llamada = dynamic_cast<NodoLlamadaFuncion*>(nodoBucle->instrucciones[j].get())) {
+                    json << "        {\n";
+                    json << "          \"tipo\": \"LLAMADA_FUNCION\",\n";
+                    json << "          \"nombre\": \"" << llamada->nombre << "\",\n";
+                    json << "          \"argumentos\": [";
+                    for (size_t k = 0; k < llamada->argumentos.size(); ++k) {
+                        json << "\"" << obtenerValorExpresion(llamada->argumentos[k].get()) << "\"";
+                        if (k != llamada->argumentos.size() - 1) json << ", ";
+                    }
+                    json << "]\n";
+                    json << "        }";
+                    if (j != nodoBucle->instrucciones.size() - 1) json << ",";
+                    json << "\n";
+                }
+            }
+            json << "      ]\n";
+        }
+
+        json << "    }";
+        if (i != programa->declaraciones.size() - 1) json << ",";
+        json << "\n";
+    }
+
+    json << "  ]\n}";
+    return json.str();
+}
+
+    // Nueva función para generar JSON usando nlohmann/json
+    inline std::string generarJsonAST(const std::unique_ptr<NodoPrograma>& programa, bool prettyPrint = true) const {
+        nlohmann::json json_ast;
+        json_ast["tipo"] = "Programa";
+        nlohmann::json declaraciones_array = nlohmann::json::array();
+        for (const auto& decl : programa->declaraciones) {
+            nlohmann::json decl_json;
+            decl_json["tipo"] = tipoNodoToString(decl->tipo);
+            if (auto nodoDecl = dynamic_cast<NodoDeclaracion*>(decl.get())) {
+                decl_json["identificador"] = nodoDecl->identificador;
+                decl_json["tipoDato"] = tipoDatoToString(nodoDecl->tipoDeclarado);
+                if (nodoDecl->expresion) {
+                    decl_json["valor"] = obtenerValorExpresion(nodoDecl->expresion.get());
+                }
+            } else if (auto nodoConfig = dynamic_cast<NodoConfigurar*>(decl.get())) {
+                nlohmann::json instrucciones_array = nlohmann::json::array();
+                for (const auto& instruccion : nodoConfig->instrucciones) {
+                    if (auto llamada = dynamic_cast<NodoLlamadaFuncion*>(instruccion.get())) {
+                        nlohmann::json llamada_json;
+                        llamada_json["tipo"] = "LLAMADA_FUNCION";
+                        llamada_json["nombre"] = llamada->nombre;
+                        nlohmann::json argumentos_array = nlohmann::json::array();
+                        for (const auto& arg : llamada->argumentos) {
+                            argumentos_array.push_back(obtenerValorExpresion(arg.get()));
+                        }
+                        llamada_json["argumentos"] = argumentos_array;
+                        instrucciones_array.push_back(llamada_json);
+                    }
+                }
+                decl_json["instrucciones"] = instrucciones_array;
+            } else if (auto nodoBucle = dynamic_cast<NodoBuclePrincipal*>(decl.get())) {
+                nlohmann::json instrucciones_array = nlohmann::json::array();
+                for (const auto& instruccion : nodoBucle->instrucciones) {
+                    if (auto llamada = dynamic_cast<NodoLlamadaFuncion*>(instruccion.get())) {
+                        nlohmann::json llamada_json;
+                        llamada_json["tipo"] = "LLAMADA_FUNCION";
+                        llamada_json["nombre"] = llamada->nombre;
+                        nlohmann::json argumentos_array = nlohmann::json::array();
+                        for (const auto& arg : llamada->argumentos) {
+                            argumentos_array.push_back(obtenerValorExpresion(arg.get()));
+                        }
+                        llamada_json["argumentos"] = argumentos_array;
+                        instrucciones_array.push_back(llamada_json);
+                    }
+                }
+                decl_json["instrucciones"] = instrucciones_array;
+            }
+            declaraciones_array.push_back(decl_json);
+        }
+        json_ast["declaraciones"] = declaraciones_array;
+
+        if (prettyPrint) {
+            return json_ast.dump(4); // Indentación de 4 espacios para mejor legibilidad
+        } else {
+            return json_ast.dump();
+        }
+    }
+
+// Actualizar la función tipoNodoToString
+static std::string tipoNodoToString(TipoNodo tipo) {
+    switch(tipo) {
+        case NODO_PROGRAMA: return "PROGRAMA";
+        case NODO_DECLARACION: return "DECLARACION";
+        case NODO_LLAMADA_FUNCION: return "LLAMADA_FUNCION";
+        case NODO_CONFIGURAR: return "CONFIGURAR";
+        case NODO_BUCLE_PRINCIPAL: return "BUCLE_PRINCIPAL";
+        case NODO_INCLUIR: return "INCLUIR";
+        case NODO_VARIABLE: return "VARIABLE";
+        case NODO_LITERAL: return "LITERAL";
+        default: return "DESCONOCIDO";
+    }
+}
+
 
 private:
     void programa() {
@@ -531,6 +674,32 @@ private:
             default:               return INDEFINIDO;
         }
     }
+    
+
+private:
+// Función de soporte
+static std::string obtenerValorExpresion(NodoExpresion* expr) {
+    if (auto var = dynamic_cast<NodoVariable*>(expr)) {
+        return var->nombre;
+    }
+    else if (auto lit = dynamic_cast<NodoLiteral*>(expr)) {
+        return lit->valor;
+    }
+    return "";
+}
+
+// Añade estas funciones en la sección private de la clase Parser
+static std::string tipoDatoToString(TipoDato tipo) {
+    switch(tipo) {
+        case ENTERO: return "ENTERO";
+        case DECIMAL: return "DECIMAL";
+        case CADENA: return "CADENA";
+        case BOOLEANO: return "BOOLEANO";
+        default: return "INDEFINIDO";
+    }
+}
+
+
 };
 
 #endif // PARSER_H
