@@ -1,3 +1,4 @@
+/* Estilos del header */
 header {
   background-color: #333;
   color: #fff;
@@ -27,6 +28,7 @@ header button:hover {
   background-color: #0056b3;
 }
 
+/* Estilos generales */
 body {
   font-family: sans-serif;
   margin: 0;
@@ -100,6 +102,75 @@ th {
   background-color: #f2f2f2;
 }
 
+/* Estilos de la tabla de tokens */
+#tabla-tokens {
+  width: 99%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  display: block;
+  max-height: 264px;
+  overflow-y: auto;
+}
+/*
+#tabla-tokens thead {
+  display: table;
+  width: 100%;
+  table-layout: fixed; /* Important: Makes column widths based on thead 
+}
+
+#tabla-tokens tbody {
+  display: block;
+  overflow-y: auto;
+  width: 100%;
+  max-height: calc(200px - 28px);
+}
+*/
+#tabla-tokens th,
+#tabla-tokens td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+  white-space: nowrap;
+  /* El ancho de las columnas se gestiona principalmente por el thead */
+}
+
+#tabla-tokens th {
+  background-color: #f2f2f2;
+}
+
+#tabla-tokens tr {
+  display: table-row;
+  width: 100%;
+  table-layout: fixed; /* Important: Makes column widths consistent */
+}
+
+/* Asegurar que las celdas del tbody también sigan el layout fijo */
+#tabla-tokens tbody tr td {
+  /* El ancho de las columnas se hereda del thead debido a table-layout: fixed en ambos */
+}
+
+/* Opcional: Si necesitas ajustar anchos específicos de columnas */
+
+#tabla-tokens th:nth-child(1),
+#tabla-tokens td:nth-child(1) {
+  width: 72px; 
+}
+
+#tabla-tokens th:nth-child(2),
+#tabla-tokens td:nth-child(2) {
+  width: 50px; 
+}
+
+#tabla-tokens th:nth-child(3),
+#tabla-tokens td:nth-child(3) {
+  width: 35vw; 
+}
+
+#tabla-tokens th:nth-child(4),
+#tabla-tokens td:nth-child(4) {
+  width: 80vw; 
+}
+
 /* Estilos del árbol sintáctico */
 #arbol-sintactico {
   margin-top: 20px;
@@ -153,4 +224,22 @@ th {
 
 .hijos-arbol > .linea-arbol:first-child {
   /* Ocultar la línea antes del primer hijo */
+}
+
+/* Estilos del footer */
+footer {
+  background-color: #333;
+  color: #fff;
+  padding: 10px 20px;
+  text-align: center;
+  font-size: 0.9em;
+}
+
+footer a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
 }

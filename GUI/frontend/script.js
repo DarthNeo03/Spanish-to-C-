@@ -8,10 +8,13 @@ function mostrarTabla(idTabla, datosTabla) {
     mensajeCelda.textContent = "No hay datos para mostrar.";
     mensajeCelda.colSpan = 10; // Ajustar según el número máximo de columnas esperado
     mensajeFila.appendChild(mensajeCelda);
-    tablaElement.appendChild(mensajeFila);
+    const tbody = document.createElement("tbody");
+    tbody.appendChild(mensajeFila);
+    tablaElement.appendChild(tbody);
     return;
   }
 
+  const thead = document.createElement("thead");
   const encabezadoFila = document.createElement("tr");
   const primerElemento = datosTabla[0];
   for (const key in primerElemento) {
@@ -21,8 +24,10 @@ function mostrarTabla(idTabla, datosTabla) {
       encabezadoFila.appendChild(th);
     }
   }
-  tablaElement.appendChild(encabezadoFila);
+  thead.appendChild(encabezadoFila);
+  tablaElement.appendChild(thead);
 
+  const tbody = document.createElement("tbody");
   datosTabla.forEach(item => {
     const dataFila = document.createElement("tr");
     for (const key in item) {
@@ -32,8 +37,9 @@ function mostrarTabla(idTabla, datosTabla) {
         dataFila.appendChild(td);
       }
     }
-    tablaElement.appendChild(dataFila);
+    tbody.appendChild(dataFila);
   });
+  tablaElement.appendChild(tbody);
 }
 
 function mostrarArbolSintactico(arbol) {

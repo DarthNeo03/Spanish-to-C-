@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Compilador StC</title>
+  <title>Compilador StC++</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -15,11 +16,11 @@
     <button id="descargar-manual">Descargar Manual</button>
   </header>
   <div class="container">
-    <h1>Compilador StC</h1>
+    <h1>Compilador StC++</h1>
 
     <form id="form-compilador">
       <label for="archivo-codigo">Selecciona el archivo de código:</label>
-      <input type="file" id="archivo-codigo" name="archivo" accept=".txt,.c,.cpp">
+      <input type="file" id="archivo-codigo" name="archivo" accept=".txt,.c,.cpp,.stcpp">
       <button type="submit">Compilar</button>
     </form>
 
@@ -36,6 +37,13 @@
     <div id="arbol-sintactico">
       </div>
   </div>
+  <footer>
+    <p>
+      Copyright © 2025 José Simón García & Moisés Terán | Universidad Valle del Momboy
+      | <a href="https://github.com/DarthNeo03/Spanish-to-C-" target="_blank" rel="noopener noreferrer">Repositorio</a>
+      | <a href="https://drive.google.com/drive/folders/1tgka7I3Y92kvcxaMoD5pimDh15k_Bf_n?usp=drive_link" target="_blank" rel="noopener noreferrer">Documentación</a>
+    </p>
+  </footer>
 
   <script src="script.js"></script>
 </body>
