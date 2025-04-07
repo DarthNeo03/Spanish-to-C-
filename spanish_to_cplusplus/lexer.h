@@ -1,6 +1,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 
+#include "errores.h"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -186,7 +187,7 @@ inline TokenType identificarPalabraReservada(const std::string& valor) {
 }
 
 // Función para realizar el análisis léxico
-inline std::vector<Token> analizadorLexico(std::ifstream& archivo) {
+inline std::vector<Token> analizadorLexico(std::ifstream& archivo, std::vector<Error>& errores) {
     std::vector<Token> tokens;
     char c;
     int linea = 1;
@@ -235,7 +236,12 @@ inline std::vector<Token> analizadorLexico(std::ifstream& archivo) {
                     }
                 }
                 if (!comentarioTerminado) {
-                    std::cerr << "Error lexico: comentario sin terminar en linea " << linea << ", columna " << columna << std::endl;
+                    errores.push_back({
+                        "Comentario sin terminar en linea",
+                        linea,
+                        columna,
+                        "Lexico"
+                    });
                 }
                 continue;
             }
@@ -243,21 +249,28 @@ inline std::vector<Token> analizadorLexico(std::ifstream& archivo) {
 
         // Detectar cadenas de texto
         if (c == '"') {
+            // Variables auxiliares para posición inicial
+            int inicio_linea = linea;
+            int inicio_columna = columna;
+            bool salto = false;
             buffer.clear();
             columna++;
 
             while (archivo.get(c) && c != '"') {
                 if (c == '\n') {
-                    std::cerr << "Error lexico: cadena sin terminar en linea " << linea << ", columna " << columna << std::endl;
+                    salto = true;
                     break;
                 }
                 buffer += c;
                 columna++;
             }
             if (c != '"') {
-                std::cerr << "Error lexico: cadena sin terminar en linea " << linea << ", columna " << columna << std::endl;
+                errores.push_back({"Cadena sin comillas de cierre", inicio_linea, inicio_columna, "Lexico"});
+                linea++;
+            } else if (salto) {
+                errores.push_back({"Salto de linea no valido", inicio_linea, inicio_columna, "Lexico"});
             } else {
-                tokens.push_back(Token{TOKEN_CADENA_LIT, buffer, linea, columna - static_cast<int>(buffer.length())});
+                tokens.push_back(Token{TOKEN_CADENA_LIT, buffer, linea, inicio_columna});
                 columna++;
             }
             continue;
@@ -271,7 +284,12 @@ inline std::vector<Token> analizadorLexico(std::ifstream& archivo) {
 
             while (archivo.get(c) && (std::isdigit(c) || c == '.')) {
                 if (c == '.' && buffer.find('.') != std::string::npos) {
-                    std::cerr << "Error lexico: numero con multiples puntos en linea " << linea << ", columna " << columna << std::endl;
+                    errores.push_back({
+                        "Numero con multiples puntos decimales", 
+                        linea, 
+                        columna, 
+                        "Lexico",
+                    });
                     break;
                 }
                 buffer += c;
@@ -299,8 +317,25 @@ inline std::vector<Token> analizadorLexico(std::ifstream& archivo) {
             }
             archivo.unget(); // Devolver el último carácter leído
 
-            TokenType tipo = identificarPalabraReservada(buffer);
-            tokens.push_back(Token{tipo, buffer, linea, columna - static_cast<int>(buffer.length())});
+            if (buffer.length() > 32) {
+                errores.push_back({
+                    "Identificador excede longitud maxima (32 caracteres)",
+                    linea,
+                    columna - static_cast<int>(buffer.length()),
+                    "Lexico"
+                });
+            } else {
+                // Verificar si el identificador es una palabra reservada
+                TokenType tipo = identificarPalabraReservada(buffer);
+                tokens.push_back(Token{tipo, buffer, linea, columna - static_cast<int>(buffer.length())});
+                /*
+                if (tipo == TOKEN_IDENTIFICADOR) {
+                    tokens.push_back(Token{tipo, buffer, linea, columna - static_cast<int>(buffer.length())});
+                } else {
+                    tokens.push_back(Token{tipo, buffer, linea, columna - static_cast<int>(buffer.length())});
+                }
+                */
+            }
             continue;
         }
 
@@ -332,7 +367,12 @@ inline std::vector<Token> analizadorLexico(std::ifstream& archivo) {
                     columna += 2;
                     continue;
                 } else {
-                    std::cerr << "Error lexico: caracter inesperado '!' en linea " << linea << ", columna " << columna << std::endl;
+                    errores.push_back({
+                        "Operador '!' no valido (quizas quiso usar '!='?)",
+                        linea,
+                        columna,
+                        "Lexico"
+                    });
                     columna++;
                     continue;
                 }
@@ -372,12 +412,23 @@ inline std::vector<Token> analizadorLexico(std::ifstream& archivo) {
             case '/':
                 // Validar si no es comentario
                 if (archivo.peek() != '/' && archivo.peek() != '*') {
-                    tokens.push_back(Token{TOKEN_DIV, "/", linea, columna});
+                    // Validar si es operador solitario
+                    if (buffer.empty() && tokens.back().type == TOKEN_ASIGNACION) {
+                        errores.push_back({"Operador '/' invalido en asignacion", linea, columna, "Lexico"});
+                    } else {
+                        tokens.push_back(Token{TOKEN_DIV, "/", linea, columna});
+                    }
+                    //tokens.push_back(Token{TOKEN_DIV, "/", linea, columna});
                     columna++;
                     continue;
                 }
             default:
-                std::cerr << "Error lexico: caracter inesperado '" << c << "' en linea " << linea << ", columna " << columna << std::endl;
+                errores.push_back({
+                    "Caracter no reconocido: '" + std::string(1, c) + "'",
+                    linea,
+                    columna,
+                    "Lexico"
+                });
                 columna++;
                 continue;
         }

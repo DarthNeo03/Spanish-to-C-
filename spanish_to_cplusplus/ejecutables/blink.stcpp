@@ -1,0 +1,24 @@
+programa ledParpadeo
+    entero pin1 = 2;
+    entero pin2 = 4;
+    cadena tipo = "SALIDA";
+    entero estadoAlto = "ALTO";
+    entero estadoBajo = "BAJO";
+
+
+    configurar
+        configurar_pin(pin1, tipo);
+        configurar_pin(pin2, tipo);
+    fin_configurar
+
+    bucle_principal
+        escribir(pin1, estadoAlto);
+        escribir(pin2, estadoBajo);
+        esperar(1000);
+
+        escribir(pin1, estadoBajo);
+        escribir(pin2, estadoAlto);
+        esperar(1000);
+    fin_bucle
+
+fin_programa

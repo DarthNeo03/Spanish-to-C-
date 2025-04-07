@@ -1,0 +1,156 @@
+header {
+  background-color: #333;
+  color: #fff;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.h1-header {
+  margin: 0;
+  font-size: 24px;
+  color: #fff;
+}
+
+header button {
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+header button:hover {
+  background-color: #0056b3;
+}
+
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+
+.container {
+  width: 80%;
+  margin: 20px auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2 {
+  color: #333;
+}
+
+/* Estilos del formulario */
+form {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+input[type="file"] {
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Estilos del código compilado */
+#codigo-compilado {
+  background-color: #f0f0f0;
+  padding: 10px;
+  border-radius: 5px;
+  white-space: pre-wrap;
+  margin-bottom: 20px;
+}
+
+/* Estilos de las tablas */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+table, th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+/* Estilos del árbol sintáctico */
+#arbol-sintactico {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  white-space: nowrap; /* Evita el salto de línea de los nodos */
+  overflow-x: auto; /* Permite el desplazamiento horizontal si el árbol es grande */
+  text-align: left; /* Alinea el texto a la izquierda para facilitar la lectura */
+}
+
+.nodo-arbol {
+  display: inline-block;
+  border: 1px solid #999;
+  padding: 8px 12px;
+  margin: 5px;
+  border-radius: 5px;
+  background-color: #fff;
+  position: relative;
+}
+
+.hijos-arbol {
+  display: flex;
+  align-items: center; /* Alinea verticalmente los hijos */
+  padding-left: 20px;
+}
+
+.linea-arbol {
+  width: 20px;
+  height: 1px;
+  background-color: #999;
+  margin-right: 10px;
+}
+
+.nodo-arbol::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  width: 1px;
+  height: 10px;
+  background-color: #999;
+  transform: translateX(-50%);
+}
+
+.hijos-arbol > .nodo-arbol::before {
+  top: -15px; /* Ajustar para la conexión vertical */
+  height: 15px;
+}
+
+.hijos-arbol > .linea-arbol:first-child {
+  /* Ocultar la línea antes del primer hijo */
+}
