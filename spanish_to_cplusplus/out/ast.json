@@ -1,0 +1,107 @@
+{
+    "declaraciones": [
+        {
+            "identificador": "pin1",
+            "tipo": "DECLARACION",
+            "tipoDato": "ENTERO",
+            "valor": "1"
+        },
+        {
+            "identificador": "pin2",
+            "tipo": "DECLARACION",
+            "tipoDato": "ENTERO",
+            "valor": "2"
+        },
+        {
+            "identificador": "tipo",
+            "tipo": "DECLARACION",
+            "tipoDato": "CADENA",
+            "valor": "SALIDA"
+        },
+        {
+            "identificador": "estadoAlto",
+            "tipo": "DECLARACION",
+            "tipoDato": "CADENA",
+            "valor": "ALTO"
+        },
+        {
+            "identificador": "estadoBajo",
+            "tipo": "DECLARACION",
+            "tipoDato": "CADENA",
+            "valor": "BAJO"
+        },
+        {
+            "instrucciones": [
+                {
+                    "argumentos": [
+                        "pin1",
+                        "tipo"
+                    ],
+                    "nombre": "configurar_pin",
+                    "tipo": "LLAMADA_FUNCION"
+                },
+                {
+                    "argumentos": [
+                        "pin2",
+                        "tipo"
+                    ],
+                    "nombre": "configurar_pin",
+                    "tipo": "LLAMADA_FUNCION"
+                }
+            ],
+            "tipo": "CONFIGURAR"
+        },
+        {
+            "instrucciones": [
+                {
+                    "argumentos": [
+                        "pin1",
+                        "estadoAlto"
+                    ],
+                    "nombre": "escribir",
+                    "tipo": "LLAMADA_FUNCION"
+                },
+                {
+                    "argumentos": [
+                        "pin2",
+                        "estadoBajo"
+                    ],
+                    "nombre": "escribir",
+                    "tipo": "LLAMADA_FUNCION"
+                },
+                {
+                    "argumentos": [
+                        "1000"
+                    ],
+                    "nombre": "esperar",
+                    "tipo": "LLAMADA_FUNCION"
+                },
+                {
+                    "argumentos": [
+                        "pin1",
+                        "estadoBajo"
+                    ],
+                    "nombre": "escribir",
+                    "tipo": "LLAMADA_FUNCION"
+                },
+                {
+                    "argumentos": [
+                        "pin2",
+                        "estadoAlto"
+                    ],
+                    "nombre": "escribir",
+                    "tipo": "LLAMADA_FUNCION"
+                },
+                {
+                    "argumentos": [
+                        "1000"
+                    ],
+                    "nombre": "esperar",
+                    "tipo": "LLAMADA_FUNCION"
+                }
+            ],
+            "tipo": "BUCLE_PRINCIPAL"
+        }
+    ],
+    "tipo": "Programa"
+}
