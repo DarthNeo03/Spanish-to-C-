@@ -27,7 +27,7 @@ app.post('/compilar', upload.single('archivo'), (req, res) => {
   const nombreBase = path.basename(nombreArchivo, path.extname(nombreArchivo));
 
   // Determinar el nombre del ejecutable según el sistema operativo
-  const nombreEjecutable = os.platform() === 'win32' ? 'compiladorStC.exe' : 'compiladorStC.out';
+  const nombreEjecutable = os.platform() === 'win32' ? 'compiladorStC.exe' : './compiladorStC.out';
   const rutaOut = path.join(__dirname, 'out');
   const rutaTokens = path.join(rutaOut, 'tokens.json');
   const rutaErrores = path.join(rutaOut, 'errores.json');
