@@ -9,10 +9,34 @@ const os = require('os');
 const app = express();
 app.use(cors());
 
+// Definir las rutas de los directorios vitales
+const uploadsDir = path.join(__dirname, 'uploads');
+const outDir = path.join(__dirname, 'out');
+const manualesDir = path.join(__dirname, 'docs');
+
+// Verificar y crear los directorios si no existen
+function verificarYCrearDirectorios() {
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    console.log(`Directorio '${uploadsDir}' creado.`);
+  }
+  if (!fs.existsSync(outDir)) {
+    fs.mkdirSync(outDir, { recursive: true });
+    console.log(`Directorio '${outDir}' creado.`);
+  }
+  if (!fs.existsSync(manualesDir)) {
+    fs.mkdirSync(manualesDir, { recursive: true });
+    console.log(`Directorio '${manualesDir}' creado.`);
+  }
+}
+
+// Llamar a la función para verificar y crear los directorios al inicio
+verificarYCrearDirectorios();
+
 // Configuración de Multer para la subida de archivos
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // Directorio donde se guardarán los archivos subidos
+    cb(null, uploadsDir); // Usar la ruta definida para uploads
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname); // Usar el nombre original del archivo
@@ -28,25 +52,19 @@ app.post('/compilar', upload.single('archivo'), (req, res) => {
 
   // Determinar el nombre del ejecutable según el sistema operativo
   const nombreEjecutable = os.platform() === 'win32' ? 'compiladorStC.exe' : './compiladorStC.out';
-  const rutaOut = path.join(__dirname, 'out');
-  const rutaTokens = path.join(rutaOut, 'tokens.json');
-  const rutaErrores = path.join(rutaOut, 'errores.json');
-  const rutaArbol = path.join(rutaOut, 'ast.json');
-  const rutaCodigo = path.join(rutaOut, 'salida.cpp');
-
-  // Asegurar que la carpeta 'out' exista
-  if (!fs.existsSync(rutaOut)) {
-    fs.mkdirSync(rutaOut, { recursive: true });
-  }
+  const rutaTokens = path.join(outDir, 'tokens.json'); // Usar la ruta definida para out
+  const rutaErrores = path.join(outDir, 'errores.json'); // Usar la ruta definida para out
+  const rutaArbol = path.join(outDir, 'ast.json'); // Usar la ruta definida para out
+  const rutaCodigo = path.join(outDir, 'salida.cpp'); // Usar la ruta definida para out
 
   // Limpiar la carpeta 'out' antes de la compilación
-  fs.readdirSync(rutaOut).forEach(file => {
-    const filePath = path.join(rutaOut, file);
+  fs.readdirSync(outDir).forEach(file => {
+    const filePath = path.join(outDir, file);
     fs.unlinkSync(filePath);
   });
 
   // Ejecutar el compilador
-  exec(`${nombreEjecutable} ./uploads/${nombreArchivo}`, (error, stdout, stderr) => {
+  exec(`${nombreEjecutable} "${archivoSubido}"`, (error, stdout, stderr) => {
     // Eliminar el archivo subido
     fs.unlinkSync(archivoSubido);
 
@@ -68,10 +86,11 @@ app.post('/compilar', upload.single('archivo'), (req, res) => {
         const tErrores =  JSON.parse(fs.readFileSync(rutaErrores, 'utf8'));
         respuesta.tablaErrores = tErrores.tablaErrores;
         if (tErrores.tablaErrores && tErrores.tablaErrores.length > 0) {
-          huboError = true;
+        huboError = true;
         }
       } else {
         huboError = false;
+        console.log('No se detectaron errores en el código.');
       }
     } catch (err) {
       console.log('No se pudo leer tabla de errores:', err.message);
@@ -122,7 +141,7 @@ app.post('/compilar', upload.single('archivo'), (req, res) => {
 
 // Ruta para descargar el manual
 app.get('/descargar-manual', (req, res) => {
-  const manualPath = path.join(__dirname, 'docs', 'manual_compilador_stc.pdf');
+  const manualPath = path.join(manualesDir, 'manual_compilador_stc.pdf'); // Usar la ruta definida para manuales
 
   fs.access(manualPath, fs.constants.R_OK, (err) => {
     if (err) {
